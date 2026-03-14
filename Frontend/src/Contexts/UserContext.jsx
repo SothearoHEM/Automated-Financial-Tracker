@@ -10,8 +10,13 @@ export const UserProvider = ({ children }) => {
     ]);
 
     const [currentUser, setCurrentUser] = useState(() => {
-        const savedCurrentUser = localStorage.getItem('currentUser');
-        return savedCurrentUser ? JSON.parse(savedCurrentUser) : null;
+        try {
+            const savedCurrentUser = localStorage.getItem('currentUser');
+            return savedCurrentUser ? JSON.parse(savedCurrentUser) : null;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     });
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
         const savedIsLoggedIn = localStorage.getItem('isLoggedIn');

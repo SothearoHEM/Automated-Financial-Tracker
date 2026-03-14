@@ -6,7 +6,7 @@ export const FinanceProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([
         {
             id: 1,
-            type : 'income',
+            type : 'Income',
             amount: 5000,
             currency: 'USD',
             category: 'Salary',
@@ -15,7 +15,7 @@ export const FinanceProvider = ({ children }) => {
         },
         {
             id: 2,
-            type : 'income',
+            type : 'Income',
             amount: 2000000,
             currency: 'KHR',
             category: 'Salary',
@@ -24,7 +24,7 @@ export const FinanceProvider = ({ children }) => {
         },
         {
             id: 3,
-            type : 'expense',
+            type : 'Expense',
             amount: 1500,
             currency: 'USD',
             category: 'Groceries',
@@ -66,10 +66,10 @@ export const FinanceProvider = ({ children }) => {
     });
 
     const addTransaction = (transaction) => {
-        setTransactions([...transactions, transaction]);
+        setTransactions([...transactions, { ...transaction, id: Date.now() }]);
     }
     const addBudget = (budget) => {
-        setBudgets([...budgets, budget]);
+        setBudgets([...budgets, { ...budget, id: Date.now() }]);
     }
     const updateTransaction = (updatedTransaction) => {
         setTransactions(transactions.map(transaction => transaction.id === updatedTransaction.id ? updatedTransaction : transaction));

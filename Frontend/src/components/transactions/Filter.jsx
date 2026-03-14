@@ -16,7 +16,7 @@ function Filter() {
             <span className='text-gray-500 text-xl'><FiFilter /></span>
             <h2 className='text-lg font-semibold'>Filter</h2>
         </div>
-        <div className='w-full flex items-center gap-4 justify-between'>
+        <div className='w-full flex md:flex-row flex-col items-center gap-4 justify-between'>
             <div className='flex flex-col gap-2 w-full'>
                 <h1>Type</h1>
                 <select 
@@ -26,7 +26,7 @@ function Filter() {
                     className='border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
                     {types.map((type, index) => (
-                        <option key={index} value={type}>{type}</option>
+                        <option key={type} value={type}>{type}</option>
                     ))}
                 </select>
             </div>
@@ -39,7 +39,7 @@ function Filter() {
                     className='border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 >
                     {categories.map((category, index) => (
-                        <option key={index} value={category}>{category}</option>
+                        <option key={category} value={category}>{category}</option>
                     ))}
                 </select>
             </div>
