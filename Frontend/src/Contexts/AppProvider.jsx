@@ -1,10 +1,13 @@
 import React from 'react'
 import { UserProvider } from './UserContext';
+import { FinanceProvider } from './FinanceContext';
 
 function AppProvider({ children }) {
   return (
       <UserProvider>
-        {children}
+        <FinanceProvider>
+            {children}
+        </FinanceProvider>
       </UserProvider>
   )
 }

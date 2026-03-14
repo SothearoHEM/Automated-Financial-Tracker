@@ -13,7 +13,7 @@ function Login() {
         password: '',
     });
     const [error, setError] = useState('');
-    const handlrchange = (e) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
@@ -42,11 +42,11 @@ function Login() {
             {error && <p className='text-red-600 text-sm w-full flex items-center gap-1'><span className='text-lg'><MdErrorOutline /></span>{error}</p>}
             <div className='relative w-full'>
                 <div className='absolute left-3 top-3 text-gray-600'><PiUser /></div>
-                <input type="text" name="username" placeholder='Username' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handlrchange} />
+                <input type="text" name="username" placeholder='Username' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handleChange} />
             </div>
             <div className='relative w-full'>
                 <div className='absolute left-3 top-3 text-gray-600'><PiLockKeyLight /></div>
-                <input type="password" name="password" placeholder='Password' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handlrchange} />
+                <input type="password" name="password" placeholder='Password' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handleChange} />
                 <p className='text-gray-600 text-sm mt-1'>Password must be more than 6 characters</p>
             </div>
             <button type='submit' className='bg-blue-500 text-white rounded-xl px-4 py-2 w-full hover:bg-blue-600'>
