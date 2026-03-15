@@ -1,4 +1,5 @@
 import { createContext,useState } from "react";
+import { convertCurrency } from '../utils/Currency';
 
 export const FinanceContext = createContext();
 
@@ -30,6 +31,15 @@ export const FinanceProvider = ({ children }) => {
             category: 'Groceries',
             date: '2024-08-01',
             description: 'August Groceries'
+        },
+        {
+            id: 4,
+            type : 'Expense',
+            amount: 1800000,
+            currency: 'KHR',
+            category: 'Entertainment',
+            date: '2024-08-05',
+            description: 'Movie and Dining Out'
         }
     ]);
     const [budgets, setBudgets] = useState([
@@ -86,8 +96,11 @@ export const FinanceProvider = ({ children }) => {
 
     const getBudgetStats = (budget) => {
         const spent = transactions.reduce((total, transaction) => {
-            if (transaction.type === 'Expense' && transaction.category === budget.category && transaction.currency === budget.currency) {
-                return total + transaction.amount;
+            if (transaction.type.toLowerCase() === 'expense' && transaction.category === budget.category) {
+                const amount = transaction.currency === budget.currency 
+                    ? transaction.amount 
+                    : convertCurrency(transaction.amount, transaction.currency, budget.currency);
+                return total + amount;
             }
             return total;
         }, 0);

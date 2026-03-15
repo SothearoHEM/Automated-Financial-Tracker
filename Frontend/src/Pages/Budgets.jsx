@@ -26,7 +26,7 @@ function Budgets() {
           </button>
         </div>
       </div>
-      <div className='w-full mt-5'>
+      <div className='w-full mt-5 mb-5'>
         <BudgetsList />
       </div>
       <div>

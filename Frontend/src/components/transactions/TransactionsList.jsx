@@ -5,6 +5,7 @@ import { MdOutlineEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useContext,useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import { getCurrencySymbol } from '../../utils/Currency';
 import EditTransactionModal from './EditTransactionModal';
 
 function TransactionsList({ transactions }) {
@@ -24,7 +25,7 @@ function TransactionsList({ transactions }) {
     };
 
   return (
-    <div className='w-full bg-white rounded-lg border border-gray-300 p-4'>
+    <div className='w-full bg-white rounded-lg border border-gray-300 p-4 mb-5'>
         <div>
             <h1 className='text-lg font-semibold mb-4'>Transaction List</h1>
             {transactions.length === 0 ? (
@@ -52,7 +53,7 @@ function TransactionsList({ transactions }) {
                         </div>
                         <div className='flex md:flex-row flex-col items-center gap-4'>
                             <p className={`text-md font-semibold ${transaction.type === 'Income' ? 'text-green-500' : 'text-red-500'}`}>
-                                {transaction.amount} {transaction.currency}
+                                {transaction.type === 'Income' ? '+' : '-'}{getCurrencySymbol(transaction.currency)}{transaction.amount.toFixed(2)}
                             </p>
                             <div className='flex items-center gap-2'>
                                 <button 

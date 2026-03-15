@@ -1,5 +1,6 @@
 import React, { useContext } from 'react'
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import { getCurrencySymbol } from '../../utils/Currency';
 import { CiCirclePlus } from "react-icons/ci";
 import { MdOutlineEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -30,7 +31,7 @@ function BudgetsList() {
                 <p className='text-gray-500'>Add a new budget to get started.</p>
             </div>
         ) : (
-            <div className='w-full mt-5 grid md:grid-cols-2 gap-4'>
+            <div className='w-full grid md:grid-cols-2 gap-4'>
                 {budgets.map((budget) => {
                     const { spent, remaining } = getBudgetStats(budget);
                     return (
@@ -40,22 +41,22 @@ function BudgetsList() {
                                     <p className='text-lg font-semibold'>{budget.category}</p>
                                     <p className='text-sm text-gray-500'>{budget.period} - {budget.currency}</p>
                                 </div>
-                                <div className='flex items-center gap-5'>
-                                    <button className='text-blue-500 hover:text-blue-700 text-xl' onClick={() => handleEditClick(budget)}>
+                                <div className='flex items-center gap-3'>
+                                    <button className='text-blue-500 hover:text-blue-700 text-lg p-2 hover:bg-blue-100 rounded-lg' onClick={() => handleEditClick(budget)}>
                                         <MdOutlineEdit />
                                     </button>
-                                    <button className='text-red-500 hover:text-red-700 text-xl' onClick={() => handleDelete(budget.id)}>
+                                    <button className='text-red-500 hover:text-red-700 text-lg p-2 hover:bg-red-100 rounded-lg' onClick={() => handleDelete(budget.id)}>
                                         <RiDeleteBin6Line />
                                     </button>
                                 </div>
                             </div>
                             <div className='w-full flex items-center gap-3 mb-4 justify-between'>
                                 <div>
-                                    <p className='text-lg text-gray-800 font-semibold'>Spent: ${spent ? spent.toFixed(2) : '0.00'}</p>
-                                    <p className='text-sm text-gray-500'>of Limit: ${budget.amount ? budget.amount.toFixed(2) : '0.00'}</p>
+                                    <p className='text-lg text-gray-800 font-semibold'>Spent: {getCurrencySymbol(budget.currency)}{spent ? spent.toFixed(2) : '0.00'}</p>
+                                    <p className='text-sm text-gray-500'>of Limit: {getCurrencySymbol(budget.currency)}{budget.amount ? budget.amount.toFixed(2) : '0.00'}</p>
                                 </div>
                                 <div className='flex flex-col items-center'>
-                                    <p className='text-xl text-blue-700 font-semibold'>${remaining ? remaining.toFixed(2) : '0.00'}</p>
+                                    <p className='text-xl text-blue-700 font-semibold'>{getCurrencySymbol(budget.currency)}{remaining ? remaining.toFixed(2) : '0.00'}</p>
                                     <p className='text-sm text-gray-500'>Remaining</p>
                                 </div>
                             </div>
