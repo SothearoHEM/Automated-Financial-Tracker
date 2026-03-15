@@ -19,7 +19,7 @@ function MobileNavbar() {
                 <ul className='flex space-x-6 justify-around w-full'>
                     {Nav.map((item, index) => (
                         <li key={index}>
-                            <NavLink to={item.link} className='text-gray-600 text-lg hover:text-blue-500 hover:bg-blue-100 hover:rounded-lg  items-center flex flex-col'>
+                            <NavLink to={item.link} className={({ isActive }) => isActive ? 'flex flex-col text-blue-500 bg-blue-100 p-1 rounded-lg font-semibold items-center justify-center' : 'flex flex-col text-gray-600 p-1 rounded-lg items-center justify-center'}>
                                 {item.logo}
                                 <span className='text-sm'>{item.name}</span>
                             </NavLink>

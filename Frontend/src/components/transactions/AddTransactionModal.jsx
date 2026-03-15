@@ -13,6 +13,7 @@ function AddTransactionModal({ isAddModalOpen, setIsAddModalOpen }) {
     ];
     const ExpenseCategories = [
         'Food',
+        'Groceries',
         'Entertainment',
         'Transportation',
         'Healthcare',
@@ -32,12 +33,11 @@ function AddTransactionModal({ isAddModalOpen, setIsAddModalOpen }) {
     });
     const formValid = tranFormData.amount && tranFormData.category && tranFormData.date && tranFormData.description;
     const handleSubmit = (e) => {
+        e.preventDefault();
         if(!formValid) {
             alert('Please fill in all required fields');
-            e.preventDefault();
             return;
         }
-        e.preventDefault();
         addTransaction({
             ...tranFormData,
             amount: Number(tranFormData.amount)

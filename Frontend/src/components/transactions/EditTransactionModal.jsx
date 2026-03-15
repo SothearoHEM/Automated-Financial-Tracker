@@ -1,5 +1,4 @@
-import React from 'react'
-import { useContext,useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
 
 function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
@@ -33,12 +32,11 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
     ];
     const formValid = tranFormData.amount && tranFormData.category && tranFormData.date && tranFormData.description;
     const handleSubmit = (e) => {
+        e.preventDefault();
         if(!formValid) {
             alert('Please fill in all required fields');
-            e.preventDefault();
             return;
         }
-        e.preventDefault();
         updateTransaction({
             ...tranFormData,
             amount: Number(tranFormData.amount)

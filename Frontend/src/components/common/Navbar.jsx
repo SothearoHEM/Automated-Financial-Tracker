@@ -24,7 +24,7 @@ function Navbar() {
     }
   return (
     <div className='w-full bg-white border-b border-gray-300 p-4 flex items-center'>
-        <div className='w-7xl mx-auto flex items-center justify-between'>
+        <div className='w-7xl mx-auto flex items-center justify-between lg:px-4 xl:px-8'>
             <div className='text-xl font-bold flex items-center'>
                 <span className='text-4xl text-blue-500'><RiMoneyDollarCircleLine /></span>
                 FinanceTracker
@@ -34,7 +34,7 @@ function Navbar() {
                     <ul className='flex space-x-6'>
                         {Nav.map((item, index) => (
                             <li key={index}>
-                                <NavLink to={item.link} className='text-gray-600 text-lg hover:text-blue-500 hover:bg-blue-100 p-1 hover:rounded-lg  items-center flex'>
+                                <NavLink to={item.link} className={({ isActive }) => isActive ? 'text-blue-500 bg-blue-100 p-2 rounded-lg font-semibold flex items-center' : 'text-gray-600 hover:text-blue-500 hover:bg-blue-100 p-2 rounded-lg flex items-center'}>
                                     {item.logo}
                                     <span className='ml-2'>{item.name}</span>
                                 </NavLink>

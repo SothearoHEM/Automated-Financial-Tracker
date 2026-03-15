@@ -84,8 +84,20 @@ export const FinanceProvider = ({ children }) => {
         setBudgets(budgets.filter(budget => budget.id !== id));
     }
 
+    const getBudgetStats = (budget) => {
+        const spent = transactions.reduce((total, transaction) => {
+            if (transaction.type === 'Expense' && transaction.category === budget.category && transaction.currency === budget.currency) {
+                return total + transaction.amount;
+            }
+            return total;
+        }, 0);
+
+        const remaining = budget.amount - spent;
+        return { spent, remaining };
+    }
+
     return (
-        <FinanceContext.Provider value={{ transactions, budgets, addTransaction, addBudget, updateTransaction, updateBudget, deleteTransaction, deleteBudget, types, categories, currencies, filter, setFilter, filteredTransactions }}>
+        <FinanceContext.Provider value={{ transactions, budgets, addTransaction, addBudget, updateTransaction, updateBudget, deleteTransaction, deleteBudget, types, categories, currencies, filter, setFilter, filteredTransactions, getBudgetStats }}>
             {children}
         </FinanceContext.Provider>
     );
