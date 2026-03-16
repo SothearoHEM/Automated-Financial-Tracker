@@ -5,6 +5,8 @@ import { PiUser } from "react-icons/pi";
 import { useContext,useState } from 'react';
 import { UserContext } from '../Contexts/UserContext';
 import { MdErrorOutline } from "react-icons/md";
+import { IoEyeOutline } from "react-icons/io5";
+import { IoEyeOffOutline } from "react-icons/io5";
 
 function Login() {
     const { login } = useContext(UserContext);
@@ -12,6 +14,7 @@ function Login() {
         username: '',
         password: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -31,6 +34,10 @@ function Login() {
             setError('');
         }
     };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
+    };
         
 
   return (
@@ -42,11 +49,14 @@ function Login() {
             {error && <p className='text-red-600 text-sm w-full flex items-center gap-1'><span className='text-lg'><MdErrorOutline /></span>{error}</p>}
             <div className='relative w-full'>
                 <div className='absolute left-3 top-3 text-gray-600'><PiUser /></div>
-                <input type="text" name="username" placeholder='Username' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handleChange} />
+                <input type="text" name="username" placeholder='Username' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500' required onChange={handleChange} />
             </div>
             <div className='relative w-full'>
                 <div className='absolute left-3 top-3 text-gray-600'><PiLockKeyLight /></div>
-                <input type="password" name="password" placeholder='Password' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10' required onChange={handleChange} />
+                <div className='absolute right-3 top-3 text-gray-600 hover:text-blue-500 text-lg' onClick={togglePasswordVisibility}>
+                    {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+                </div>
+                <input type={showPassword ? "text" : "password"} name="password" placeholder='Password' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500' required onChange={handleChange} />
                 <p className='text-gray-600 text-sm mt-1'>Password must be more than 6 characters</p>
             </div>
             <button type='submit' className='bg-blue-500 text-white rounded-xl px-4 py-2 w-full hover:bg-blue-600'>

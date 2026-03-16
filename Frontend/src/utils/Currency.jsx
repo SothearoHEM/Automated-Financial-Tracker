@@ -1,11 +1,17 @@
+const defaultExchangeRate = 4000; // 1 USD = 4000 KHR
+
+const getExchangeRate = () => {
+    const savedRate = localStorage.getItem('exchangeRate');
+    return savedRate ? parseFloat(savedRate) : defaultExchangeRate;
+}
 
 export const convertCurrency = (amount, fromCurrency, toCurrency) => {
-    const exchangeRate = 4000;
+    const rate = getExchangeRate();
     if (fromCurrency === 'USD' && toCurrency === 'KHR') {
-        return amount * exchangeRate;
+        return amount * rate;
     }
     if (fromCurrency === 'KHR' && toCurrency === 'USD') {
-        return amount / exchangeRate;
+        return amount / rate;
     }
     return amount;
 }

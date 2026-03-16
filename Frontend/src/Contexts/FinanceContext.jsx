@@ -71,6 +71,18 @@ export const FinanceProvider = ({ children }) => {
             period: 'Monthly'
         }
     ]);
+    const [exchangeRate, setExchangeRate] = useState(() => {
+        const savedRate = localStorage.getItem('exchangeRate');
+        return savedRate ? parseFloat(savedRate) : 4000;
+    });
+
+    const updateExchangeRate = (newRate) => {
+        setExchangeRate(newRate);
+        localStorage.setItem('exchangeRate', newRate.toString());
+    }
+
+
+
     const types = ['All Types', ...Array.from(new Set(transactions.map(transaction => transaction.type)))];
     const categories = ['All Categories', ...Array.from(new Set(transactions.map(transaction => transaction.category)))];
     const currencies = ['All Currencies', ...Array.from(new Set(transactions.map(transaction => transaction.currency)))];
@@ -304,7 +316,9 @@ export const FinanceProvider = ({ children }) => {
             totalExpensesKHR,
             totalExpensesUSD,
             totalIncomeKHR,
-            totalIncomeUSD
+            totalIncomeUSD,
+            exchangeRate,
+            updateExchangeRate
         }}>
             {children}
         </FinanceContext.Provider>
