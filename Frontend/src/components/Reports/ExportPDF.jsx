@@ -1,7 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { FaRegFilePdf } from "react-icons/fa";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import  {jsPDF } from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { FinanceContext } from '../../Contexts/FinanceContext';
 import { formatCurrency } from '../../utils/Currency';
