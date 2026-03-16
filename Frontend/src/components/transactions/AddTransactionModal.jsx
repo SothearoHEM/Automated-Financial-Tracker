@@ -2,7 +2,7 @@ import React from 'react'
 import { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
 
-function AddTransactionModal({ isAddModalOpen, setIsAddModalOpen }) {
+function AddTransactionModal({ setIsAddModalOpen }) {
     const IncomeCategories = [
         'Salary',
         'Business',

@@ -19,6 +19,11 @@ export const getCurrencySymbol = (currency) => {
     return '';
 }
 
+export const formatCurrency = (amount, currency) => {
+    const symbol = getCurrencySymbol(currency);
+    return `${symbol}${amount.toLocaleString()}`;
+}
+
 export const calculateTotal = (transactions, type, toCurrency = 'KHR') => {
     return transactions
         .filter(transaction => transaction.type.toLowerCase() === type.toLowerCase())
