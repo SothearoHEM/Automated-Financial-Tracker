@@ -5,10 +5,11 @@ import { formatCurrency } from '../../utils/Currency';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#FF6B6B', '#4ECDC4'];
 
-function SpendingbyCategoryKHR() {
-    const { categoryChartDataKHR } = useContext(FinanceContext);
+function SpendingbyCategory({ currency }) {
+    const { categoryChartDataKHR, categoryChartDataUSD } = useContext(FinanceContext);
+    const data = currency === 'USD' ? categoryChartDataUSD : categoryChartDataKHR;
 
-    if (!categoryChartDataKHR || categoryChartDataKHR.length === 0) {
+    if (!data || data.length === 0) {
         return (
             <div className="bg-white rounded-xl p-6 border border-gray-200 w-full shadow-sm flex items-center justify-center h-75">
                 <p className="text-gray-500">No spending data available</p>
@@ -18,12 +19,12 @@ function SpendingbyCategoryKHR() {
 
     return (
         <div className="bg-white rounded-xl p-6 border border-gray-200 w-full shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-6 text-lg">Spending by Category (KHR)</h3>
+            <h3 className="font-semibold text-gray-900 mb-6 text-lg">Spending by Category ({currency})</h3>
             <div className="w-full h-75">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
-                            data={categoryChartDataKHR}
+                            data={data}
                             cx="50%"
                             cy="50%"
                             labelLine={false}
@@ -32,12 +33,12 @@ function SpendingbyCategoryKHR() {
                             fill="#8884d8"
                             dataKey="value"
                         >
-                            {categoryChartDataKHR.map((entry, index) => (
+                            {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
                         <Tooltip
-                            formatter={(value) => formatCurrency(value, 'KHR')}
+                            formatter={(value) => formatCurrency(value, currency)}
                             contentStyle={{ 
                                 borderRadius: '8px', 
                                 border: 'none', 
@@ -51,4 +52,4 @@ function SpendingbyCategoryKHR() {
     );
 }
 
-export default SpendingbyCategoryKHR;
+export default SpendingbyCategory;

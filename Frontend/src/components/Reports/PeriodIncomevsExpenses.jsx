@@ -3,11 +3,12 @@ import { FinanceContext } from '../../Contexts/FinanceContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../../utils/Currency';
 
-function PeriodIncomevsExpensesKHR({ reportType }) {
-    const { periodDataKHR } = useContext(FinanceContext);
-    const title = reportType === 'weekly' ? 'Weekly Income vs Expenses (KHR)' : 'Monthly Income vs Expenses (KHR)';
+function PeriodIncomevsExpenses({ reportType, currency }) {
+    const { periodDataKHR, periodDataUSD } = useContext(FinanceContext);
+    const data = currency === 'USD' ? periodDataUSD : periodDataKHR;
+    const title = reportType === 'weekly' ? `Weekly Income vs Expenses (${currency})` : `Monthly Income vs Expenses (${currency})`;
     
-    const tooltipFormatter = (value) => formatCurrency(value, 'KHR');
+    const tooltipFormatter = (value) => formatCurrency(value, currency);
     
     return (
         <div className="bg-white rounded-xl p-6 border border-gray-200 w-full shadow-sm">
@@ -16,7 +17,7 @@ function PeriodIncomevsExpensesKHR({ reportType }) {
             </h3>
             <div className="w-full h-75">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={periodDataKHR} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                             dataKey="period" 
@@ -62,4 +63,4 @@ function PeriodIncomevsExpensesKHR({ reportType }) {
     );
 }
 
-export default PeriodIncomevsExpensesKHR;
+export default PeriodIncomevsExpenses;

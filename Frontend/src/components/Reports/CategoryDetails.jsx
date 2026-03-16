@@ -4,19 +4,21 @@ import { formatCurrency } from '../../utils/Currency';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#FF6B6B', '#4ECDC4'];
 
-function CategoryDetailsKHR() {
-    const { categoryChartDataKHR, totalExpensesKHR } = useContext(FinanceContext);
+function CategoryDetails({ currency }) {
+    const { categoryChartDataKHR, totalExpensesKHR, categoryChartDataUSD, totalExpensesUSD } = useContext(FinanceContext);
+    const data = currency === 'USD' ? categoryChartDataUSD : categoryChartDataKHR;
+    const totalExpenses = currency === 'USD' ? totalExpensesUSD : totalExpensesKHR;
 
-    if (!categoryChartDataKHR || categoryChartDataKHR.length === 0) {
-        return null; // Or return a placeholder if desired
+    if (!data || data.length === 0) {
+        return null;
     }
 
     return (
         <div className="bg-white rounded-xl p-6 border border-gray-200 w-full shadow-sm h-full">
-            <h3 className="font-semibold text-gray-900 mb-6 text-lg">Category Details (KHR)</h3>
+            <h3 className="font-semibold text-gray-900 mb-6 text-lg">Category Details ({currency})</h3>
             <div className="space-y-4 overflow-y-auto max-h-75 pr-2 custom-scrollbar">
-                {categoryChartDataKHR.map((item, index) => {
-                    const percentage = totalExpensesKHR ? (item.value / totalExpensesKHR) * 100 : 0;
+                {data.map((item, index) => {
+                    const percentage = totalExpenses ? (item.value / totalExpenses) * 100 : 0;
                     return (
                         <div key={item.name} className="w-full">
                             <div className="flex items-center justify-between mb-2">
@@ -28,7 +30,7 @@ function CategoryDetailsKHR() {
                                     <span className="text-sm font-medium text-gray-700">{item.name}</span>
                                 </div>
                                 <span className="text-sm font-semibold text-gray-900">
-                                    {formatCurrency(item.value, 'KHR')}
+                                    {formatCurrency(item.value, currency)}
                                 </span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-2">
@@ -51,4 +53,4 @@ function CategoryDetailsKHR() {
     );
 }
 
-export default CategoryDetailsKHR;
+export default CategoryDetails;

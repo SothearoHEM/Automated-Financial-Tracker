@@ -3,11 +3,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { FinanceContext } from '../../Contexts/FinanceContext';
 import { formatCurrency } from '../../utils/Currency';
 
-function SavingsTrendUSD({ reportType }) {
-  const { savingsTrendDataUSD } = useContext(FinanceContext);
-  const title = reportType === 'weekly' ? 'Weekly Savings Trend (USD)' : 'Monthly Savings Trend (USD)';
+function SavingsTrend({ reportType, currency }) {
+  const { savingsTrendDataKHR, savingsTrendDataUSD } = useContext(FinanceContext);
+  const data = currency === 'USD' ? savingsTrendDataUSD : savingsTrendDataKHR;
+  const title = reportType === 'weekly' ? `Weekly Savings Trend (${currency})` : `Monthly Savings Trend (${currency})`;
 
-  const tooltipFormatter = (value) => formatCurrency(value, 'USD');
+  const tooltipFormatter = (value) => formatCurrency(value, currency);
 
   return (
     <div className="bg-white rounded-xl p-6 border border-gray-200 w-full shadow-sm">
@@ -16,7 +17,7 @@ function SavingsTrendUSD({ reportType }) {
       </h3>
       <div className="w-full h-75">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={savingsTrendDataUSD} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis 
               dataKey="period" 
@@ -57,4 +58,4 @@ function SavingsTrendUSD({ reportType }) {
   );
 }
 
-export default SavingsTrendUSD;
+export default SavingsTrend;

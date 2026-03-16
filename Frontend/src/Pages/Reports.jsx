@@ -1,22 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { CiCalendar } from "react-icons/ci";
 import { useContext, useRef } from 'react';
 import { FinanceContext } from '../Contexts/FinanceContext';
 import { CiCirclePlus } from "react-icons/ci";
 import ReportInfoCard from '../components/Reports/ReportInfoCard';
-import PeriodIncomevsExpensesKHR from '../components/Reports/PeriodIncomevsExpensesKHR';
-import PeriodIncomevsExpensesUSD from '../components/Reports/PeriodIncomevsExpensesUSD';
-import SavingsTrendKHR from '../components/Reports/SavingsTrendKHR';
-import SavingsTrendUSD from '../components/Reports/SavingsTrendUSD';
-import SpendingbyCategoryKHR from '../components/Reports/SpendingbyCategoryKHR';
-import SpendingbyCategoryUSD from '../components/Reports/SpendingbyCategoryUSD';
-import CategoryDetailsKHR from '../components/Reports/CategoryDetailsKHR';
-import CategoryDetailsUSD from '../components/Reports/CategoryDetailsUSD';
+import PeriodIncomevsExpenses from '../components/Reports/PeriodIncomevsExpenses';
+import SavingsTrend from '../components/Reports/SavingsTrend';
+import SpendingbyCategory from '../components/Reports/SpendingbyCategory';
+import CategoryDetails from '../components/Reports/CategoryDetails';
 import ExportPDF from '../components/Reports/ExportPDF';
 
 function Reports() {
   const {transactions, reportType, setReportType, timeRange, setTimeRange} = useContext(FinanceContext);
   const reportRef = useRef();
+  const [currency, setCurrency] = useState('KHR');
 
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
@@ -26,6 +23,14 @@ function Reports() {
           <p className='text-gray-500'>View your financial reports and insights</p>
         </div>
         <div className='flex md:flex-row flex-col items-start md:items-center gap-4 w-full md:w-auto'>
+          <div className='flex items-center gap-2 border border-gray-300 rounded-lg px-2 py-1 w-full md:w-auto overflow-x-auto'>
+            <button className={currency === 'KHR' ? 'bg-green-500 text-white rounded-lg px-4 py-1 flex-1 md:flex-none whitespace-nowrap' : 'text-gray-700 px-4 py-1 rounded-lg hover:bg-gray-300 flex-1 md:flex-none whitespace-nowrap'} onClick={() => setCurrency('KHR')}>
+              KHR
+            </button>
+            <button className={currency === 'USD' ? 'bg-green-500 text-white rounded-lg px-4 py-1 flex-1 md:flex-none whitespace-nowrap' : 'text-gray-700 px-4 py-1 rounded-lg hover:bg-gray-300 flex-1 md:flex-none whitespace-nowrap'} onClick={() => setCurrency('USD')}>
+              USD
+            </button>
+          </div>
           <div className='flex items-center gap-2 border border-gray-300 rounded-lg px-2 py-1 w-full md:w-auto overflow-x-auto'>
             <button className={reportType === 'weekly' ? 'bg-blue-500 text-white rounded-lg px-4 py-1 flex-1 md:flex-none whitespace-nowrap' : 'text-gray-700 px-4 py-1 rounded-lg hover:bg-gray-300 flex-1 md:flex-none whitespace-nowrap'} onClick={() => setReportType('weekly')}>
               Weekly
@@ -60,21 +65,17 @@ function Reports() {
                 <div className='w-full mt-5'>
                   <ReportInfoCard />
                 </div>
-                <div className='w-full mt-5 flex flex-col items-center justify-center gap-5'>
-                  <PeriodIncomevsExpensesKHR reportType={reportType} />
-                  <PeriodIncomevsExpensesUSD reportType={reportType} />
+                <div className='w-full mt-5'>
+                  <PeriodIncomevsExpenses reportType={reportType} currency={currency} />
                 </div>
-                <div className='w-full mt-5 flex flex-col items-center justify-center gap-5'>
-                  <SavingsTrendKHR reportType={reportType} />
-                  <SavingsTrendUSD reportType={reportType} />
+                <div className='w-full mt-5'>
+                  <SavingsTrend reportType={reportType} currency={currency} />
                 </div> 
-                <div className='w-full mt-5 grid grid-cols-1 md:grid-cols-2 gap-5'>
-                  <SpendingbyCategoryKHR reportType={reportType} />
-                  <SpendingbyCategoryUSD reportType={reportType} />
+                <div className='w-full mt-5'>
+                  <SpendingbyCategory reportType={reportType} currency={currency} />
                 </div>
-                <div className='w-full mt-5 grid grid-cols-1 md:grid-cols-2 gap-5'>
-                  <CategoryDetailsKHR reportType={reportType} />
-                  <CategoryDetailsUSD reportType={reportType} />
+                <div className='w-full mt-5'>
+                  <CategoryDetails reportType={reportType} currency={currency} />
                 </div>
             </div>
         )}

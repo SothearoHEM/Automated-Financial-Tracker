@@ -15,7 +15,9 @@ const ExportPDF = () => {
         totalIncomeUSD, 
         totalExpensesUSD,
         periodDataKHR,
-        periodDataUSD
+        periodDataUSD,
+        categoryChartDataKHR,
+        categoryChartDataUSD
     } = useContext(FinanceContext);
 
     const formatCurrencyForPDF = (amount, currency) => {
@@ -49,55 +51,66 @@ const ExportPDF = () => {
             doc.text(`Report Type: ${reportType === 'weekly' ? 'Weekly' : 'Monthly'}`, 14, 34);
             doc.text(`Period: Last ${timeRange} ${reportType === 'weekly' ? 'Weeks' : 'Months'}`, 14, 40);
             
-            // Summary section - KHR
+            // Summary section
             doc.setFontSize(14);
-            doc.text('Summary (KHR)', 14, 51);
+            doc.text('Summary', 14, 51);
             
             doc.setFontSize(10);
-            doc.text(`Total Income: ${formatCurrencyForPDF(totalIncomeKHR, 'KHR')}`, 14, 59);
-            doc.text(`Total Expenses: ${formatCurrencyForPDF(totalExpensesKHR, 'KHR')}`, 14, 65);
-            doc.text(`Net Savings: ${formatCurrencyForPDF(totalIncomeKHR - totalExpensesKHR, 'KHR')}`, 14, 71);
-            doc.text(`Savings Rate: ${savingsRateKHR.toFixed(1)}%`, 14, 77);
+            doc.text(`Total Income: ${formatCurrencyForPDF(totalIncomeKHR, 'KHR')} / ${formatCurrencyForPDF(totalIncomeUSD, 'USD')}`, 14, 59);
+            doc.text(`Total Expenses: ${formatCurrencyForPDF(totalExpensesKHR, 'KHR')} / ${formatCurrencyForPDF(totalExpensesUSD, 'USD')}`, 14, 65);
+            doc.text(`Net Savings: ${formatCurrencyForPDF(totalIncomeKHR - totalExpensesKHR, 'KHR')} / ${formatCurrencyForPDF(totalIncomeUSD - totalExpensesUSD, 'USD')}`, 14, 71);
+            doc.text(`Savings Rate: ${savingsRateKHR.toFixed(1)}% (KHR) / ${savingsRateUSD.toFixed(1)}% (USD)`, 14, 77);
             
-            // Summary section - USD
+            // Period breakdown table
             doc.setFontSize(14);
-            doc.text('Summary (USD)', 14, 88);
-            
-            doc.setFontSize(10);
-            doc.text(`Total Income: ${formatCurrencyForPDF(totalIncomeUSD, 'USD')}`, 14, 96);
-            doc.text(`Total Expenses: ${formatCurrencyForPDF(totalExpensesUSD, 'USD')}`, 14, 102);
-            doc.text(`Net Savings: ${formatCurrencyForPDF(totalIncomeUSD - totalExpensesUSD, 'USD')}`, 14, 108);
-            doc.text(`Savings Rate: ${savingsRateUSD.toFixed(1)}%`, 14, 114);
-            
-            // Period breakdown table (KHR)
-            doc.setFontSize(14);
-            doc.text(`${reportType === 'weekly' ? 'Weekly' : 'Monthly'} Breakdown (KHR)`, 14, 125);
+            doc.text(`${reportType === 'weekly' ? 'Weekly' : 'Monthly'} Breakdown`, 14, 88);
             
             autoTable(doc, {
-                startY: 130,
-                head: [[reportType === 'weekly' ? 'Week' : 'Month', 'Income', 'Expenses', 'Savings']],
-                body: periodDataKHR.map((m) => [
-                    m.period,
-                    formatCurrencyForPDF(m.income, 'KHR'),
-                    formatCurrencyForPDF(m.expenses, 'KHR'),
-                    formatCurrencyForPDF(m.income - m.expenses, 'KHR'),
-                ]),
+                startY: 93,
+                head: [[reportType === 'weekly' ? 'Week' : 'Month', 'Income (KHR / USD)', 'Expenses (KHR / USD)', 'Savings (KHR / USD)']],
+                body: periodDataKHR.map((m, index) => {
+                    const usdData = periodDataUSD[index] || { income: 0, expenses: 0 };
+                    return [
+                        m.period,
+                        `${formatCurrencyForPDF(m.income, 'KHR')}\n${formatCurrencyForPDF(usdData.income, 'USD')}`,
+                        `${formatCurrencyForPDF(m.expenses, 'KHR')}\n${formatCurrencyForPDF(usdData.expenses, 'USD')}`,
+                        `${formatCurrencyForPDF(m.income - m.expenses, 'KHR')}\n${formatCurrencyForPDF(usdData.income - usdData.expenses, 'USD')}`,
+                    ];
+                }),
             });
 
-            // Period breakdown table (USD)
-            const finalY = (doc).lastAutoTable.finalY + 15;
-            doc.text(`${reportType === 'weekly' ? 'Weekly' : 'Monthly'} Breakdown (USD)`, 14, finalY);
+            // Category breakdown table
+            if ((categoryChartDataKHR && categoryChartDataKHR.length > 0) || (categoryChartDataUSD && categoryChartDataUSD.length > 0)) {
+                // Combine categories from both currencies
+                const categories = Array.from(new Set([
+                    ...(categoryChartDataKHR || []).map(c => c.name),
+                    ...(categoryChartDataUSD || []).map(c => c.name)
+                ]));
 
-            autoTable(doc, {
-                startY: finalY + 5,
-                head: [[reportType === 'weekly' ? 'Week' : 'Month', 'Income', 'Expenses', 'Savings']],
-                body: periodDataUSD.map((m) => [
-                    m.period,
-                    formatCurrencyForPDF(m.income, 'USD'),
-                    formatCurrencyForPDF(m.expenses, 'USD'),
-                    formatCurrencyForPDF(m.income - m.expenses, 'USD'),
-                ]),
-            });
+                const finalY2 = (doc).lastAutoTable.finalY + 15;
+                doc.text(`Spending by Category`, 14, finalY2);
+
+                autoTable(doc, {
+                    startY: finalY2 + 5,
+                    head: [['Category', 'Amount (KHR / USD)', '% of Total Expenses (KHR / USD)']],
+                    body: categories.map((name) => {
+                        const khrItem = categoryChartDataKHR?.find(c => c.name === name);
+                        const usdItem = categoryChartDataUSD?.find(c => c.name === name);
+                        
+                        const khrAmt = khrItem ? khrItem.value : 0;
+                        const usdAmt = usdItem ? usdItem.value : 0;
+                        
+                        const khrPct = totalExpensesKHR ? ((khrAmt / totalExpensesKHR) * 100).toFixed(1) + '%' : '0%';
+                        const usdPct = totalExpensesUSD ? ((usdAmt / totalExpensesUSD) * 100).toFixed(1) + '%' : '0%';
+
+                        return [
+                            name,
+                            `${formatCurrencyForPDF(khrAmt, 'KHR')}\n${formatCurrencyForPDF(usdAmt, 'USD')}`,
+                            `${khrPct}\n${usdPct}`
+                        ];
+                    }),
+                });
+            }
             
             // Save the PDF
             doc.save(`${reportType}-financial-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
