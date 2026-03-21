@@ -6,7 +6,9 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState([
         {
+            id : 1,
             name: 'Nora',
+            username : 'nora',
             password: '12345678',
         }
     ]);
@@ -39,10 +41,12 @@ export const UserProvider = ({ children }) => {
     }, [isLoggedIn]);
 
     const login = (username, password) => {
-        const foundUser = user.find((u) => u.name === username && u.password === password);
+        const foundUser = user.find((u) => (u.username === username || u.name === username) && u.password === password);
         if (foundUser) {
             setCurrentUser({
+                id: foundUser.id,
                 name: foundUser.name,
+                username: foundUser.username,
             });
             setIsLoggedIn(true);
             return true;
@@ -60,8 +64,37 @@ export const UserProvider = ({ children }) => {
         localStorage.removeItem('isLoggedIn');
     };
 
+    const addUser = (name, username, password) => {
+        const maxId = user.length > 0 ? Math.max(...user.map(u => u.id)) : 0;
+        const newUser = {
+            id: maxId + 1,
+            name,
+            username,
+            password,
+        };
+        setUser((prev) => [...prev, newUser]);
+        return newUser;
+    };
+
+    const register = (name, username, password, password_confirmation) => {
+        if (password !== password_confirmation) {
+            return false;
+        }
+        if (user.some((u) => u.username === username)) {
+            return false;
+        }
+        const newUser = addUser(name, username, password);
+        setCurrentUser({
+            id: newUser.id,
+            name,
+            username,
+        });
+        setIsLoggedIn(true);
+        return true;
+    };
+
     return (
-        <UserContext.Provider value={{ user, setUser, currentUser, setCurrentUser, isLoggedIn, setIsLoggedIn, login, logout }}>
+        <UserContext.Provider value={{ user, setUser, currentUser, setCurrentUser, isLoggedIn, setIsLoggedIn, login, logout, register, addUser }}>
             {children}
         </UserContext.Provider>
     );

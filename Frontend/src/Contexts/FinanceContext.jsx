@@ -286,6 +286,8 @@ export const FinanceProvider = ({ children }) => {
         return periodDataUSD.reduce((acc, item) => acc + item.income, 0);
     }, [periodDataUSD]);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     return (
         <FinanceContext.Provider value={{ 
             transactions, 
@@ -318,7 +320,9 @@ export const FinanceProvider = ({ children }) => {
             totalIncomeKHR,
             totalIncomeUSD,
             exchangeRate,
-            updateExchangeRate
+            updateExchangeRate,
+            isLoading,
+            setIsLoading
         }}>
             {children}
         </FinanceContext.Provider>
