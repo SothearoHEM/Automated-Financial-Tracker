@@ -1,6 +1,7 @@
 import React from 'react'
 import { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import ErrorDisplay from '../common/ErrorDisplay';
 
 function AddTransactionModal({ setIsAddModalOpen }) {
     const IncomeCategories = [
@@ -31,18 +32,39 @@ function AddTransactionModal({ setIsAddModalOpen }) {
         date: '',
         description: ''
     });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
     const formValid = tranFormData.amount && tranFormData.category && tranFormData.date && tranFormData.description;
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         if(!formValid) {
-            alert('Please fill in all required fields');
+            setError('Please fill in all required fields');
             return;
         }
-        addTransaction({
-            ...tranFormData,
-            amount: Number(tranFormData.amount)
-        });
-        setIsAddModalOpen(false);
+        setLoading(true);
+        try {
+            await addTransaction({
+                ...tranFormData,
+                amount: Number(tranFormData.amount)
+            });
+            setIsAddModalOpen(false);
+            // Reset form
+            setTranFormData({
+                amount: '',
+                type: 'Income',
+                currency: 'USD',
+                category: '',
+                date: '',
+                description: ''
+            });
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to add transaction');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleTypeChange = (type) => {
@@ -59,6 +81,11 @@ function AddTransactionModal({ setIsAddModalOpen }) {
     <div className='w-full h-screen fixed top-0 left-0 bg-black/50 bg-opacity-50 flex items-center justify-center md:p-0 p-4 overflow-auto z-50'>
         <div className='w-full max-w-md bg-white rounded-lg p-6'>
             <h1 className='text-xl font-semibold mb-4'>Add New Transaction</h1>
+            {error && (
+                <div className="mb-4">
+                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                </div>
+            )}
             <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
                 <div className='flex flex-col gap-2 w-full'>
                     <label className='text-sm font-medium'>Type</label>
@@ -144,8 +171,8 @@ function AddTransactionModal({ setIsAddModalOpen }) {
                     <button  type="button" className='bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600' onClick={handleCancel}>
                         Cancel
                     </button>
-                    <button type="submit" className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600'>
-                        Add Transaction
+                    <button type="submit" className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed' disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Transaction'}
                     </button>
                 </div>
             </form>

@@ -9,14 +9,25 @@ import SavingsTrend from '../components/Reports/SavingsTrend';
 import SpendingbyCategory from '../components/Reports/SpendingbyCategory';
 import CategoryDetails from '../components/Reports/CategoryDetails';
 import ExportPDF from '../components/Reports/ExportPDF';
+import Loading from '../components/common/Loading';
+import ErrorDisplay from '../components/common/ErrorDisplay';
 
 function Reports() {
-  const {transactions, reportType, setReportType, timeRange, setTimeRange} = useContext(FinanceContext);
+  const {transactions, reportType, setReportType, timeRange, setTimeRange, isLoading, error, refreshData} = useContext(FinanceContext);
   const reportRef = useRef();
   const [currency, setCurrency] = useState('KHR');
 
+  if (isLoading) {
+    return <Loading message="Loading reports..." />;
+  }
+
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
+      {error && (
+        <div className="w-full mb-4">
+          <ErrorDisplay message={error} onRetry={refreshData} retryLabel="Reload Reports" />
+        </div>
+      )}
       <div className='w-full flex md:flex-row flex-col md:items-center items-start justify-between gap-4'>
         <div className='flex flex-col'>
           <h1 className='text-2xl font-bold'>Reports</h1>

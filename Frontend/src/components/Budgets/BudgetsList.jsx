@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { FinanceContext } from '../../Contexts/FinanceContext';
 import { getCurrencySymbol } from '../../utils/Currency';
 import { CiCirclePlus } from "react-icons/ci";
@@ -7,11 +7,15 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import EditBudgetModal from './EditBudgetModal';
 
 function BudgetsList() {
-    const {budgets, getBudgetStats, deleteBudget} = useContext(FinanceContext);
+    const {budgets, getBudgetStats, deleteBudget, setError, budgetPeriods, budgetPeriodFilter, setBudgetPeriodFilter, filteredBudgets} = useContext(FinanceContext);
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if(window.confirm('Are you sure you want to delete this budget?')) {
-            deleteBudget(id);
+            try {
+                await deleteBudget(id);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to delete budget');
+            }
         }
     }
 
@@ -24,7 +28,22 @@ function BudgetsList() {
 
   return (
     <div className='w-full'>
-        {budgets.length === 0 ? (
+        {/* Period Filter */}
+        <div className='mb-4 flex items-center gap-2'>
+            <label htmlFor="periodFilter" className='text-gray-700 font-medium'>Filter by Period:</label>
+            <select
+                id="periodFilter"
+                value={budgetPeriodFilter}
+                onChange={(e) => setBudgetPeriodFilter(e.target.value)}
+                className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            >
+                {budgetPeriods.map(period => (
+                    <option key={period} value={period}>{period}</option>
+                ))}
+            </select>
+        </div>
+
+        {filteredBudgets.length === 0 ? (
             <div className='w-full bg-white border border-gray-300 rounded-lg flex flex-col p-4 items-center justify-center py-10'>
                 <div className='text-7xl text-gray-500'><CiCirclePlus /></div>
                 <p className='text-gray-800 text-lg'>No budgets found.</p>
@@ -32,7 +51,7 @@ function BudgetsList() {
             </div>
         ) : (
             <div className='w-full grid md:grid-cols-2 gap-4'>
-                {budgets.map((budget) => {
+                {filteredBudgets.map((budget) => {
                     const { spent, remaining } = getBudgetStats(budget);
                     return (
                         <div key={budget.id} className='border border-gray-200 p-4 rounded-lg flex flex-col items-center'>

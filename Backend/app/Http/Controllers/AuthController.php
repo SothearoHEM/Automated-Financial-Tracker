@@ -61,4 +61,17 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    public function updateExchangeRate(Request $request)
+    {
+        $request->validate([
+            'exchange_rate' => 'required|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+        $user->exchange_rate = $request->exchange_rate;
+        $user->save();
+
+        return response()->json(['message' => 'Exchange rate updated successfully', 'exchange_rate' => $user->exchange_rate], 200);
+    }
 }

@@ -9,11 +9,15 @@ import { getCurrencySymbol } from '../../utils/Currency';
 import EditTransactionModal from './EditTransactionModal';
 
 function TransactionsList({ transactions }) {
-    const {deleteTransaction} = useContext(FinanceContext);
-    
-    const handleDelete = (id) => {
+    const {deleteTransaction, setError} = useContext(FinanceContext);
+
+    const handleDelete = async (id) => {
         if(window.confirm('Are you sure you want to delete this transaction?')) {
-            deleteTransaction(id);
+            try {
+                await deleteTransaction(id);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to delete transaction');
+            }
         }
     }
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { PiLockKeyLight } from "react-icons/pi";
 import { PiUser } from "react-icons/pi";
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../Contexts/UserContext';
 import { MdErrorOutline } from "react-icons/md";
@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import Loading from '../components/common/Loading';
 
 function Register() {
-    const { register } = useContext(UserContext);
+    const { register, isLoggedIn } = useContext(UserContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
@@ -23,17 +23,26 @@ function Register() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Redirect if already logged in
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate('/');
+        }
+    }, [isLoggedIn, navigate]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password.length <= 6) {
-            setError('Password must be more than 6 characters');
+
+        if (formData.password.length <= 7) {
+            setError('Password must be more than 7 characters');
             return;
         }
+
         if (formData.password !== formData.password_confirmation) {
             setError('Passwords do not match');
             return;
@@ -42,17 +51,18 @@ function Register() {
         setLoading(true);
         setError('');
 
-        // Use setTimeout to allow UI to update and show loading state
-        setTimeout(() => {
-            const success = register(formData.name, formData.username, formData.password, formData.password_confirmation);
-            if (!success) {
-                setError("Registration failed. Please try again.");
+        try {
+            const result = await register(formData.name, formData.username, formData.password, formData.password_confirmation);
+            if (!result.success) {
+                setError(result.message || "Registration failed. Please try again.");
                 setLoading(false);
             } else {
-                setLoading(false);
-                navigate('/');
+                // Success - UserContext will set isLoggedIn and redirect via useEffect
             }
-        }, 0);
+        } catch (err) {
+            setError("An error occurred. Please try again.");
+            setLoading(false);
+        }
     };
 
     const togglePasswordVisibility = () => {
@@ -154,7 +164,7 @@ function Register() {
 
                 <div className='text-center text-sm text-gray-600'>
                     Already have an account?{' '}
-                    <Link to="/login" className='text-blue-500 hover:text-blue-600 font-medium'>
+                    <Link to="/login" className='text-blue-500 hover:underline font-medium'>
                         Login here
                     </Link>
                 </div>

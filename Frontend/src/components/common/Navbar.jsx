@@ -10,16 +10,16 @@ import { useContext } from 'react';
 import { UserContext } from '../../Contexts/UserContext';
 
 function Navbar() {
-    const { logout,currentUser } = useContext(UserContext);
+    const { logout, currentUser, logoutLoading } = useContext(UserContext);
     const Nav = [
         { name: 'Dashboard', link: '/' ,logo : <MdOutlineDashboard />},
         { name: 'Transactions', link: '/transactions', logo: <TbReceiptDollar /> },
         { name: 'Budgets', link: '/budgets', logo: <FiTarget /> },
         { name: 'Reports', link: '/reports', logo: <VscGraph /> },
     ];
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (window.confirm("Are you sure you want to logout?")) {
-            logout();
+            await logout();
         }
     }
   return (
@@ -44,9 +44,19 @@ function Navbar() {
                 </nav>
                 <div className='border-l border-gray-300 h-7 flex items-center pl-4'>
                     <p className='text-gray-800 font-semibold text-xl'>{currentUser?.name}</p>
-                    <button className='ml-4 bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center' onClick={handleLogout}>
-                        <span><FiLogOut /></span>
-                        <span className='ml-2 md:block hidden'>Logout</span>
+                    <button
+                        className='ml-4 bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center disabled:bg-blue-300 disabled:cursor-not-allowed'
+                        onClick={handleLogout}
+                        disabled={logoutLoading}
+                    >
+                        {logoutLoading ? (
+                            <span className='animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full'></span>
+                        ) : (
+                            <>
+                                <span><FiLogOut /></span>
+                                <span className='ml-2 md:block hidden'>Logout</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

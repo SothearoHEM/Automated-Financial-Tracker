@@ -1,18 +1,10 @@
 import { createContext, useEffect, useState } from 'react';
+import { authAPI } from '../api/auth';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState([
-        {
-            id : 1,
-            name: 'Nora',
-            username : 'nora',
-            password: '12345678',
-        }
-    ]);
-
     const [currentUser, setCurrentUser] = useState(() => {
         try {
             const savedCurrentUser = localStorage.getItem('currentUser');
@@ -26,75 +18,111 @@ export const UserProvider = ({ children }) => {
         const savedIsLoggedIn = localStorage.getItem('isLoggedIn');
         return savedIsLoggedIn === 'true';
     });
+    const [loading, setLoading] = useState(true);
+    const [logoutLoading, setLogoutLoading] = useState(false);
+
+    // On mount: if token exists, validate it by fetching current user
+    useEffect(() => {
+        const validateToken = async () => {
+            const token = localStorage.getItem('auth_token');
+            if (token && currentUser) {
+                try {
+                    const response = await authAPI.getCurrentUser();
+                    setCurrentUser(response.data);
+                    setIsLoggedIn(true);
+                } catch (error) {
+                    console.error('Token validation failed:', error);
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('isLoggedIn');
+                    setCurrentUser(null);
+                    setIsLoggedIn(false);
+                }
+            }
+            setLoading(false);
+        };
+
+        validateToken();
+    }, []);
 
     useEffect(() => {
         if (currentUser) {
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
-        else {            
+            setIsLoggedIn(true);
+        } else {
             localStorage.removeItem('currentUser');
+            localStorage.removeItem('isLoggedIn');
+            setIsLoggedIn(false);
         }
     }, [currentUser]);
 
-    useEffect(() => {
-        localStorage.setItem('isLoggedIn', isLoggedIn);
-    }, [isLoggedIn]);
-
-    const login = (username, password) => {
-        const foundUser = user.find((u) => (u.username === username || u.name === username) && u.password === password);
-        if (foundUser) {
-            setCurrentUser({
-                id: foundUser.id,
-                name: foundUser.name,
-                username: foundUser.username,
-            });
-            setIsLoggedIn(true);
-            return true;
+    const login = async (username, password) => {
+        try {
+            const response = await authAPI.login(username, password);
+            localStorage.setItem('auth_token', response.data.token);
+            // Fetch current user details
+            const userResponse = await authAPI.getCurrentUser();
+            setCurrentUser(userResponse.data);
+            return { success: true, message: response.data.message };
+        } catch (error) {
+            const message = error.response?.data?.message || 'Login failed';
+            return { success: false, message };
         }
-        else {
+    };
+
+    const logout = async () => {
+        setLogoutLoading(true);
+        try {
+            await authAPI.logout();
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('isLoggedIn');
+            setCurrentUser(null);
             setIsLoggedIn(false);
-            return false;
+            setLogoutLoading(false);
         }
     };
 
-    const logout = () => {
-        setCurrentUser(null);
-        setIsLoggedIn(false);
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('isLoggedIn');
-    };
+    const register = async (name, username, password, password_confirmation) => {
+        try {
+            const response = await authAPI.register(name, username, password, password_confirmation);
+            localStorage.setItem('auth_token', response.data.token);
+            setCurrentUser(response.data.user);
+            setIsLoggedIn(true);
+            return { success: true, message: response.data.message };
+        } catch (error) {
+            console.error('Registration error:', error.response?.data || error.message);
+            let message = 'Registration failed';
 
-    const addUser = (name, username, password) => {
-        const maxId = user.length > 0 ? Math.max(...user.map(u => u.id)) : 0;
-        const newUser = {
-            id: maxId + 1,
-            name,
-            username,
-            password,
-        };
-        setUser((prev) => [...prev, newUser]);
-        return newUser;
-    };
+            // Laravel validation errors format: { "field": ["message1", "message2"] }
+            if (error.response?.data?.errors) {
+                const errors = Object.values(error.response.data.errors).flat();
+                message = errors.join('. ');
+            } else if (error.response?.data?.message) {
+                message = error.response.data.message;
+            } else if (error.message) {
+                message = error.message;
+            }
 
-    const register = (name, username, password, password_confirmation) => {
-        if (password !== password_confirmation) {
-            return false;
+            return { success: false, message };
         }
-        if (user.some((u) => u.username === username)) {
-            return false;
-        }
-        const newUser = addUser(name, username, password);
-        setCurrentUser({
-            id: newUser.id,
-            name,
-            username,
-        });
-        setIsLoggedIn(true);
-        return true;
     };
 
     return (
-        <UserContext.Provider value={{ user, setUser, currentUser, setCurrentUser, isLoggedIn, setIsLoggedIn, login, logout, register, addUser }}>
+        <UserContext.Provider value={{
+            currentUser,
+            setCurrentUser,
+            isLoggedIn,
+            setIsLoggedIn,
+            login,
+            logout,
+            register,
+            loading,
+            logoutLoading
+        }}>
             {children}
         </UserContext.Provider>
     );

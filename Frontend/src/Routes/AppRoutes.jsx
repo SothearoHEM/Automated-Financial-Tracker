@@ -9,9 +9,16 @@ import { UserContext } from '../Contexts/UserContext';
 import Register from '../Pages/Register';
 import Navbar from '../components/common/Navbar';
 import MobileNavbar from '../components/common/MobileNavbar';
+import Loading from '../components/common/Loading';
 
 function AppRoutes() {
-    const { currentUser } = useContext(UserContext);
+    const { currentUser, loading } = useContext(UserContext);
+
+    if (loading) {
+        // Could render a global loading spinner here
+        return <Loading message='Loading...'/>;
+    }
+
     if (!currentUser) {
         return (
             <Router>

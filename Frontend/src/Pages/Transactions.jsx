@@ -4,14 +4,25 @@ import Filter from '../components/transactions/Filter';
 import { FinanceContext } from '../Contexts/FinanceContext';
 import TransactionsList from '../components/transactions/TransactionsList';
 import AddTransactionModal from '../components/transactions/AddTransactionModal';
+import Loading from '../components/common/Loading';
+import ErrorDisplay from '../components/common/ErrorDisplay';
 
 function Transactions() {
-  const { filteredTransactions } = useContext(FinanceContext);
+  const { filteredTransactions, isLoading, error, refreshData } = useContext(FinanceContext);
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 
 
+  if (isLoading) {
+    return <Loading message="Loading transactions..." />;
+  }
+
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
+      {error && (
+        <div className="w-full mb-4">
+          <ErrorDisplay message={error} onRetry={refreshData} retryLabel="Reload Transactions" />
+        </div>
+      )}
       <div className='w-full h-16 flex items-center justify-between'>
         <div className='flex flex-col'>
           <h1 className='text-2xl font-bold'>Transactions</h1>

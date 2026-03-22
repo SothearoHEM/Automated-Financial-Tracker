@@ -1,17 +1,17 @@
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { PiLockKeyLight } from "react-icons/pi";
 import { PiUser } from "react-icons/pi";
-import { useContext,useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../Contexts/UserContext';
 import { MdErrorOutline } from "react-icons/md";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Loading from '../components/common/Loading';
 
-
 function Login() {
-    const { login } = useContext(UserContext);
+    const { login, isLoggedIn, loading: authLoading } = useContext(UserContext);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -20,34 +20,48 @@ function Login() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Redirect if already logged in
+    useEffect(() => {
+        if (isLoggedIn) {
+            navigate('/');
+        }
+    }, [isLoggedIn, navigate]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.password.length <= 6) {
-            setError('Password must be more than 6 characters');
+        if (formData.password.length <= 7) {
+            setError('Password must be more than 7 characters');
             return;
         }
 
         setLoading(true);
         setError('');
 
-        setTimeout(() => {
-            const success = login(formData.username, formData.password);
-            if (!success) {
-                setError("Invalid username or password");
+        try {
+            const result = await login(formData.username, formData.password);
+            if (!result.success) {
+                setError(result.message || "Invalid username or password");
             }
+            // If success, UserContext will set isLoggedIn and redirect will happen via useEffect
+        } catch (err) {
+            setError("An error occurred. Please try again.");
+        } finally {
             setLoading(false);
-        }, 0);
+        }
     };
 
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
-        
+
+    if (authLoading) {
+        return <Loading message="Checking authentication..." />;
+    }
 
   if (loading) {
       return <Loading message="Logging you in..." />;
@@ -70,7 +84,7 @@ function Login() {
                     {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
                 </div>
                 <input type={showPassword ? "text" : "password"} name="password" placeholder='Password' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500' required onChange={handleChange} />
-                <p className='text-gray-600 text-sm mt-1'>Password must be more than 6 characters</p>
+                <p className='text-gray-600 text-sm mt-1'>Password must be more than 7 characters</p>
             </div>
             <button type='submit' className='bg-blue-500 text-white rounded-xl px-4 py-2 w-full hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed' disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}

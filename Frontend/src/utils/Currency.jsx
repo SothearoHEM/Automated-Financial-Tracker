@@ -2,18 +2,22 @@ const defaultExchangeRate = 4000; // 1 USD = 4000 KHR
 
 const getExchangeRate = () => {
     const savedRate = localStorage.getItem('exchangeRate');
-    return savedRate ? parseFloat(savedRate) : defaultExchangeRate;
+    if (!savedRate) return defaultExchangeRate;
+    const parsed = parseFloat(savedRate);
+    return isNaN(parsed) || parsed <= 0 ? defaultExchangeRate : parsed;
 }
 
 export const convertCurrency = (amount, fromCurrency, toCurrency) => {
     const rate = getExchangeRate();
+    const numAmount = Number(amount);
+    if (isNaN(numAmount)) return 0;
     if (fromCurrency === 'USD' && toCurrency === 'KHR') {
-        return amount * rate;
+        return numAmount * rate;
     }
     if (fromCurrency === 'KHR' && toCurrency === 'USD') {
-        return amount / rate;
+        return numAmount / rate;
     }
-    return amount;
+    return numAmount;
 }
 
 export const getCurrencySymbol = (currency) => {

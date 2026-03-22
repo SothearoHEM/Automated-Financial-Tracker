@@ -2,7 +2,11 @@ import React from 'react'
 import { useState } from 'react';
 
 function ExchangeRatesModal({ isOpen, onClose, exchangeRate, updateExchangeRate }) {
-  const [newRate, setNewRate] = useState(exchangeRate);
+  const [newRate, setNewRate] = useState(() => {
+    // Ensure initial value is a number
+    const rate = Number(exchangeRate);
+    return isNaN(rate) ? 4000 : rate;
+  });
 
   const handleSave = () => {
     updateExchangeRate(newRate);
@@ -18,17 +22,25 @@ function ExchangeRatesModal({ isOpen, onClose, exchangeRate, updateExchangeRate 
             <p className='text-gray-500 mb-4 text-sm'>Set the exchange rate between USD and Cambodian Riel (KHR). This will affect all currency conversions in the app.</p>
             <form action="">
                 <label htmlFor="exchangeRate" className='block text-gray-800 mb-2'>Exchange Rate (USD to KHR)</label>
-                <input 
-                    type="number" 
-                    id="exchangeRate" 
-                    placeholder="Enter exchange rate" 
-                    className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full' 
+                <input
+                    type="number"
+                    id="exchangeRate"
+                    placeholder="Enter exchange rate"
+                    className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
                     step="0.01"
                     value={newRate}
-                    onChange={(e) => setNewRate(parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '') {
+                        setNewRate(0);
+                      } else {
+                        const parsed = parseFloat(value);
+                        setNewRate(isNaN(parsed) ? 0 : parsed);
+                      }
+                    }}
                 />
             </form>
-            <p className='text-gray-500 text-sm mt-4'>Current: 1 USD = ៛{newRate.toFixed(2)} KHR</p>
+            <p className='text-gray-500 text-sm mt-4'>Current: 1 USD = ៛{typeof newRate === 'number' && !isNaN(newRate) ? newRate.toFixed(2) : '0.00'} KHR</p>
             <div className='mt-6 flex justify-start gap-2 items-center'>
                 <p>Quick actions:</p>
                 <button className='bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300' onClick={() => setNewRate(4000)}>

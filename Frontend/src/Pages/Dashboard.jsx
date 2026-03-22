@@ -7,9 +7,11 @@ import { useContext,useState } from 'react';
 import { FinanceContext } from '../Contexts/FinanceContext';
 import { convertCurrency } from '../utils/Currency';
 import { MdCurrencyExchange } from "react-icons/md";
+import Loading from '../components/common/Loading';
+import ErrorDisplay from '../components/common/ErrorDisplay';
 
 function Dashboard() {
-  const {budgets, transactions, exchangeRate , updateExchangeRate} = useContext(FinanceContext);
+  const {budgets, transactions, exchangeRate , updateExchangeRate, isLoading, error, setError, refreshData} = useContext(FinanceContext);
 
   const [isExchangeRatesModalOpen, setIsExchangeRatesModalOpen] = useState(false);
 
@@ -30,6 +32,23 @@ function Dashboard() {
   });
 
   const budgetAlerts = spendingRate.filter(item => item.rate >= 80);
+
+  if (isLoading) {
+    return <Loading message="Loading dashboard data..." />;
+  }
+
+  if (error) {
+    return (
+      <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
+        <ErrorDisplay
+          message={error}
+          onRetry={refreshData}
+          onDismiss={() => setError(null)}
+          retryLabel="Reload Dashboard"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>

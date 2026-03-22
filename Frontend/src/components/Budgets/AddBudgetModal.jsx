@@ -1,5 +1,6 @@
 import { useContext,useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import ErrorDisplay from '../common/ErrorDisplay';
 
 function AddBudgetModal({ setIsAddModalOpen }) {
     const {addBudget} = useContext(FinanceContext);
@@ -16,30 +17,52 @@ function AddBudgetModal({ setIsAddModalOpen }) {
     ];
     const [formData, setFormData] = useState({
         period: 'Monthly',
-        category: '',   
+        category: '',
         amount: '',
         currency: 'USD'
     });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const formValid = formData.category && formData.amount && formData.currency;
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         if(!formValid) {
-            alert('Please fill in all required fields');
+            setError('Please fill in all required fields');
             return;
         }
-        addBudget({
-            ...formData,
-            amount: Number(formData.amount)
-        });
-        setIsAddModalOpen(false);
+        setLoading(true);
+        try {
+            await addBudget({
+                ...formData,
+                amount: Number(formData.amount)
+            });
+            setIsAddModalOpen(false);
+            // Reset form
+            setFormData({
+                period: 'Monthly',
+                category: '',
+                amount: '',
+                currency: 'USD'
+            });
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to add budget');
+        } finally {
+            setLoading(false);
+        }
     };
-    
+
   return (
     <div className='fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 md:p-0 p-4'>
         <div className='bg-white rounded-lg p-6 w-full max-w-md'>
             <h2 className='text-2xl font-bold mb-4'>Add Budget</h2>
+            {error && (
+                <div className="mb-4">
+                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className='mb-4 w-full'>
                     <label className='block text-gray-700 mb-2'>Period</label>
@@ -69,17 +92,17 @@ function AddBudgetModal({ setIsAddModalOpen }) {
                 <div className='mb-4'>
                     <label className='block text-gray-700 mb-2'>Budget Limit</label>
                     <div className='flex items-center gap-2'>
-                        <input 
-                            type='number' 
-                            className='w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500' 
-                            value={formData.amount} 
-                            onChange={(e) => setFormData({...formData, amount: e.target.value})} 
+                        <input
+                            type='number'
+                            className='w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                            value={formData.amount}
+                            onChange={(e) => setFormData({...formData, amount: e.target.value})}
                         />
-                        <select 
-                            name="currency" 
-                            id="currency" 
+                        <select
+                            name="currency"
+                            id="currency"
                             className='ml-2 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                            value={formData.currency} 
+                            value={formData.currency}
                             onChange={(e) => setFormData({...formData, currency: e.target.value})}
                         >
                             <option value="USD">USD</option>
@@ -91,8 +114,8 @@ function AddBudgetModal({ setIsAddModalOpen }) {
                     <button type='button' className='px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400' onClick={() => setIsAddModalOpen(false)}>
                         Cancel
                     </button>
-                    <button type='submit' className='px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white'>
-                        Add Budget
+                    <button type='submit' className='px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300 disabled:cursor-not-allowed' disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Budget'}
                     </button>
                 </div>
             </form>

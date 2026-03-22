@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import ErrorDisplay from '../common/ErrorDisplay';
 
 function EditBudgetModal({ budget, setIsEditModalOpen }) {
     const { updateBudget } = useContext(FinanceContext);
@@ -10,6 +11,8 @@ function EditBudgetModal({ budget, setIsEditModalOpen }) {
         currency: budget?.currency || 'USD',
         period: budget?.period || 'Monthly'
     });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const ExpenseCategories = [
         'Food',
         'Groceries',
@@ -22,17 +25,25 @@ function EditBudgetModal({ budget, setIsEditModalOpen }) {
         'Other'
     ];
     const formValid = formData.category && formData.amount && formData.currency;
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         if(!formValid) {
-            alert('Please fill in all required fields');
+            setError('Please fill in all required fields');
             return;
         }
-        updateBudget({
-            ...formData,
-            amount: Number(formData.amount)
-        });
-        setIsEditModalOpen(false);
+        setLoading(true);
+        try {
+            await updateBudget({
+                ...formData,
+                amount: Number(formData.amount)
+            });
+            setIsEditModalOpen(false);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to update budget');
+        } finally {
+            setLoading(false);
+        }
     };
     const handleCancel = () => {
         setIsEditModalOpen(false);
@@ -41,6 +52,11 @@ function EditBudgetModal({ budget, setIsEditModalOpen }) {
     <div className='fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 md:p-0 p-4'>
         <div className='bg-white rounded-lg p-6 w-full max-w-md'>
             <h2 className='text-2xl font-bold mb-4'>Edit Budget</h2>
+            {error && (
+                <div className="mb-4">
+                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className='mb-4 w-full'>
                     <label className='block text-gray-700 mb-2'>Period</label>
@@ -92,8 +108,8 @@ function EditBudgetModal({ budget, setIsEditModalOpen }) {
                     <button type='button' className='px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400' onClick={handleCancel}>
                         Cancel
                     </button>
-                    <button type='submit' className='px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white'>
-                        Save Changes
+                    <button type='submit' className='px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300 disabled:cursor-not-allowed' disabled={loading}>
+                        {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>

@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
+import ErrorDisplay from '../common/ErrorDisplay';
 
 function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
     const { updateTransaction } = useContext(FinanceContext);
@@ -12,6 +13,8 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
         date: transactionToEdit?.date || '',
         description: transactionToEdit?.description || ''
     });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const IncomeCategories = [
         'Salary',
         'Business',
@@ -31,17 +34,25 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
         'Other'
     ];
     const formValid = tranFormData.amount && tranFormData.category && tranFormData.date && tranFormData.description;
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         if(!formValid) {
-            alert('Please fill in all required fields');
+            setError('Please fill in all required fields');
             return;
         }
-        updateTransaction({
-            ...tranFormData,
-            amount: Number(tranFormData.amount)
-        });
-        setIsEditModalOpen(false);
+        setLoading(true);
+        try {
+            await updateTransaction({
+                ...tranFormData,
+                amount: Number(tranFormData.amount)
+            });
+            setIsEditModalOpen(false);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to update transaction');
+        } finally {
+            setLoading(false);
+        }
     };
     const handleCancel = () => {
         setIsEditModalOpen(false);
@@ -56,6 +67,11 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
     <div className='w-full h-screen fixed top-0 left-0 bg-black/50 bg-opacity-50 flex items-center justify-center md:p-0 p-4 overflow-auto z-50'>
         <div className='w-full max-w-md bg-white rounded-lg p-6'>
             <h1 className='text-xl font-semibold mb-4'>Edit Transaction</h1>
+            {error && (
+                <div className="mb-4">
+                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                </div>
+            )}
             <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
                 <div className='flex flex-col gap-2 w-full'>
                     <label className='text-sm font-medium'>Type</label>
@@ -143,8 +159,8 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
                     <button  type="button" className='bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600' onClick={handleCancel}>
                         Cancel
                     </button>
-                    <button type="submit" className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600'>
-                        Save Changes
+                    <button type="submit" className='bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed' disabled={loading}>
+                        {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </form>
