@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useMemo, useCallback } from "react"
 import { convertCurrency } from '../utils/Currency';
 import { transactionsAPI } from '../api/transactions';
 import { budgetsAPI } from '../api/budgets';
+import { goalsAPI } from '../api/goals';
 import { authAPI } from '../api/auth';
 import { useContext } from 'react';
 import { UserContext } from './UserContext';
@@ -25,6 +26,7 @@ export const FinanceProvider = ({ children }) => {
     const { currentUser, setCurrentUser } = useContext(UserContext);
     const [transactions, setTransactions] = useState([]);
     const [budgets, setBudgets] = useState([]);
+    const [goals, setGoals] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [exchangeRate, setExchangeRate] = useState(() => {
@@ -70,9 +72,10 @@ export const FinanceProvider = ({ children }) => {
             setIsLoading(true);
             setError(null);
             try {
-                const [txRes, budgetsRes] = await Promise.all([
+                const [txRes, budgetsRes, goalsRes] = await Promise.all([
                     transactionsAPI.getAll(),
                     budgetsAPI.getAll(),
+                    goalsAPI.getAll(),
                 ]);
                 // Transform transactions: ensure amount is number and capitalize type
                 const transactionsData = (txRes.data.transactions || []).map(t => ({
@@ -89,6 +92,15 @@ export const FinanceProvider = ({ children }) => {
                     period: b.period ? b.period.charAt(0).toUpperCase() + b.period.slice(1) : 'Monthly'
                 }));
                 setBudgets(budgetsData);
+
+                // Transform goals: ensure amounts are numbers and capitalize status
+                const goalsData = (goalsRes.data.goals || []).map(g => ({
+                    ...g,
+                    target_amount: isNaN(parseFloat(g.target_amount)) ? 0 : parseFloat(g.target_amount),
+                    current_amount: isNaN(parseFloat(g.current_amount)) ? 0 : parseFloat(g.current_amount),
+                    status: g.status ? g.status.charAt(0).toUpperCase() + g.status.slice(1).replace(/_/g, ' ') : 'In Progress'
+                }));
+                setGoals(goalsData);
             } catch (err) {
                 console.error('Failed to fetch data:', err);
                 setError(err.response?.data?.message || 'Failed to load data. Please refresh the page.');
@@ -119,6 +131,11 @@ export const FinanceProvider = ({ children }) => {
         return ['All Periods', ...Array.from(new Set(allPeriods))];
     }, [budgets]);
 
+    const goalStatus = useMemo(() => {
+        const allStatus = goals.map(g => g.status).filter(Boolean);
+        return ['All Status', ...Array.from(new Set(allStatus))];
+    }, [goals]);
+
     const [filter, setFilter] = useState({
         type: 'All Types',
         category: 'All Categories',
@@ -126,6 +143,7 @@ export const FinanceProvider = ({ children }) => {
     });
 
     const [budgetPeriodFilter, setBudgetPeriodFilter] = useState('All Periods');
+    const [goalStatusFilter, setGoalStatusFilter] = useState('All Status');
 
     const filteredTransactions = useMemo(() => {
         return transactions.filter(transaction => {
@@ -141,6 +159,13 @@ export const FinanceProvider = ({ children }) => {
             return budgetPeriodFilter === 'All Periods' || budget.period === budgetPeriodFilter;
         });
     }, [budgets, budgetPeriodFilter]);
+
+    const filteredGoals = useMemo(() => {
+        return goals.filter(goal => {
+            const statusMatch = goalStatusFilter === 'All Status' || goal.status === goalStatusFilter;
+            return statusMatch;
+        });
+    }, [goals, goalStatusFilter]);
 
     const addTransaction = async (transaction) => {
         try {
@@ -257,6 +282,58 @@ export const FinanceProvider = ({ children }) => {
             throw error;
         }
     };
+
+    const addGoal = async (goal) => {
+        try {
+            const response = await goalsAPI.create(goal);
+            const newGoal = {
+                ...response.data.goal,
+                target_amount: parseFloat(response.data.goal.target_amount),
+                current_amount: parseFloat(response.data.goal.current_amount),
+                status: response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1)
+            };
+            setGoals(prev => [newGoal, ...prev]);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to create goal:', error);
+            throw error;
+        }
+    };
+
+    const updateGoal = async (id, goalData) => {
+        try {
+            const response = await goalsAPI.update(id, goalData);
+            const updatedGoal = {
+                ...response.data.goal,
+                target_amount: parseFloat(response.data.goal.target_amount),
+                current_amount: parseFloat(response.data.goal.current_amount),
+                status: response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1)
+            };
+            setGoals(prev => prev.map(g => g.id === id ? updatedGoal : g));
+            return response.data;
+        } catch (error) {
+            console.error('Failed to update goal:', error);
+            throw error;
+        }
+    };
+
+    const deleteGoal = async (id) => {
+        try {
+            await goalsAPI.delete(id);
+            setGoals(prev => prev.filter(g => g.id !== id));
+        } catch (error) {
+            console.error('Failed to delete goal:', error);
+            throw error;
+        }
+    };
+
+    const getGoalProgress = useCallback((goal) => {
+        const progress = goal.target_amount > 0
+            ? (goal.current_amount / goal.target_amount) * 100
+            : 0;
+        const remaining = goal.target_amount - goal.current_amount;
+        return { progress: Math.min(progress, 100), remaining };
+    }, []);
 
     const getBudgetStats = useCallback((budget) => {
         const spent = transactions.reduce((total, transaction) => {
@@ -426,9 +503,10 @@ export const FinanceProvider = ({ children }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const [txRes, budgetsRes] = await Promise.all([
+            const [txRes, budgetsRes, goalsRes] = await Promise.all([
                 transactionsAPI.getAll(),
                 budgetsAPI.getAll(),
+                goalsAPI.getAll(),
             ]);
             // Transform transactions: ensure amount is number and capitalize type
             const transactionsData = (txRes.data.transactions || []).map(t => ({
@@ -445,6 +523,15 @@ export const FinanceProvider = ({ children }) => {
                 period: b.period ? b.period.charAt(0).toUpperCase() + b.period.slice(1) : 'Monthly'
             }));
             setBudgets(budgetsData);
+
+            // Transform goals
+            const goalsData = (goalsRes.data.goals || []).map(g => ({
+                ...g,
+                target_amount: isNaN(parseFloat(g.target_amount)) ? 0 : parseFloat(g.target_amount),
+                current_amount: isNaN(parseFloat(g.current_amount)) ? 0 : parseFloat(g.current_amount),
+                status: g.status ? g.status.charAt(0).toUpperCase() + g.status.slice(1).replace(/_/g, ' ') : 'In Progress'
+            }));
+            setGoals(goalsData);
         } catch (err) {
             console.error('Failed to refresh data:', err);
             setError(err.response?.data?.message || 'Failed to refresh data.');
@@ -457,8 +544,12 @@ export const FinanceProvider = ({ children }) => {
         <FinanceContext.Provider value={{
             transactions,
             budgets,
+            goals,
             addTransaction,
             addBudget,
+            addGoal,
+            updateGoal,
+            deleteGoal,
             updateTransaction,
             updateBudget,
             deleteTransaction,
@@ -470,10 +561,15 @@ export const FinanceProvider = ({ children }) => {
             setFilter,
             filteredTransactions,
             getBudgetStats,
+            getGoalProgress,
             budgetPeriods,
             budgetPeriodFilter,
             setBudgetPeriodFilter,
             filteredBudgets,
+            goalStatus,
+            goalStatusFilter,
+            setGoalStatusFilter,
+            filteredGoals,
             reportType,
             setReportType,
             timeRange,

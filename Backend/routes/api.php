@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\GoalController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -22,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Budgets
     Route::apiResource('budgets', BudgetController::class);
+
+    // Goals
+    Route::apiResource('goals', GoalController::class);
 });

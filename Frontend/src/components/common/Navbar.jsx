@@ -8,6 +8,7 @@ import { FiLogOut } from "react-icons/fi";
 import { NavLink } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserContext } from '../../Contexts/UserContext';
+import { LuGoal } from "react-icons/lu";
 
 function Navbar() {
     const { logout, currentUser, logoutLoading } = useContext(UserContext);
@@ -15,6 +16,7 @@ function Navbar() {
         { name: 'Dashboard', link: '/' ,logo : <MdOutlineDashboard />},
         { name: 'Transactions', link: '/transactions', logo: <TbReceiptDollar /> },
         { name: 'Budgets', link: '/budgets', logo: <FiTarget /> },
+        { name: 'Goals', link: '/goals', logo: <LuGoal /> },
         { name: 'Reports', link: '/reports', logo: <VscGraph /> },
     ];
     const handleLogout = async () => {

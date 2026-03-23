@@ -54,7 +54,7 @@ function BudgetsList() {
                 {filteredBudgets.map((budget) => {
                     const { spent, remaining } = getBudgetStats(budget);
                     return (
-                        <div key={budget.id} className='border border-gray-200 p-4 rounded-lg flex flex-col items-center'>
+                        <div key={budget.id} className='border border-gray-300 p-4 rounded-lg bg-white flex flex-col items-center'>
                             <div className='w-full flex items-center gap-3 mb-4 justify-between'>
                                 <div className='flex flex-col items-start gap-1'>
                                     <p className='text-lg font-semibold'>{budget.category}</p>

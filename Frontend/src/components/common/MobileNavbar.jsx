@@ -4,30 +4,37 @@ import { TbReceiptDollar } from "react-icons/tb";
 import { VscGraph } from "react-icons/vsc";
 import { FiTarget } from "react-icons/fi";
 import { NavLink } from 'react-router-dom';
+import { LuGoal } from "react-icons/lu";
 
 function MobileNavbar() {
   const Nav = [
           { name: 'Dashboard', link: '/' ,logo : <MdOutlineDashboard />},
           { name: 'Transactions', link: '/transactions', logo: <TbReceiptDollar /> },
           { name: 'Budgets', link: '/budgets', logo: <FiTarget /> },
+          { name: 'Goals', link: '/goals', logo: <LuGoal /> },
           { name: 'Reports', link: '/reports', logo: <VscGraph /> },
       ];
   return (
-    <div className='fixed bottom-0 w-full bg-white border-t border-gray-300 p-1.5 flex items-center md:hidden'>
-        <div className='w-full mx-auto flex items-center justify-around'>
-            <nav className='w-full'>
-                <ul className='flex space-x-6 justify-around w-full'>
-                    {Nav.map((item, index) => (
-                        <li key={index}>
-                            <NavLink to={item.link} className={({ isActive }) => isActive ? 'flex flex-col text-blue-500 bg-blue-100 p-1 rounded-lg font-semibold items-center justify-center' : 'flex flex-col text-gray-600 p-1 rounded-lg items-center justify-center'}>
-                                {item.logo}
-                                <span className='text-sm'>{item.name}</span>
-                            </NavLink>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-        </div>
+    <div className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden safe-area-bottom z-50'>
+      <nav className='w-full'>
+        <ul className='flex items-center justify-around py-2 px-1'>
+          {Nav.map((item, index) => (
+            <li key={index} className='flex-1'>
+              <NavLink
+                to={item.link}
+                className={({ isActive }) =>
+                  isActive
+                    ? 'flex flex-col items-center justify-center p-2 rounded-lg bg-blue-50 text-blue-600 transition-colors'
+                    : 'flex flex-col items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors'
+                }
+              >
+                <span className='text-xl mb-1'>{item.logo}</span>
+                <span className='text-[10px] font-medium truncate max-w-full'>{item.name}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   )
 }
