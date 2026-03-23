@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
-import ErrorDisplay from '../common/ErrorDisplay';
+import ErrorForm from '../common/ErrorForm';
 
 function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
     const { updateTransaction } = useContext(FinanceContext);
@@ -69,7 +69,7 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
             <h1 className='text-xl font-semibold mb-4'>Edit Transaction</h1>
             {error && (
                 <div className="mb-4">
-                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                    <ErrorForm message={error} />
                 </div>
             )}
             <form className='flex flex-col gap-4' onSubmit={handleSubmit}>

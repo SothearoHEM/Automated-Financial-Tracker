@@ -4,7 +4,7 @@ import { PiUser } from "react-icons/pi";
 import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../Contexts/UserContext';
-import { MdErrorOutline } from "react-icons/md";
+import ErrorForm from '../components/common/ErrorForm';
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { Link } from 'react-router-dom';
@@ -80,12 +80,7 @@ function Register() {
                 <h2 className='text-2xl font-bold text-center'>FinanceTracker</h2>
                 <p className='text-gray-600 text-center'>Create your account</p>
 
-                {error && (
-                    <div className='text-red-600 text-sm w-full flex items-center gap-1 bg-red-50 p-3 rounded-lg'>
-                        <span className='text-lg'><MdErrorOutline /></span>
-                        {error}
-                    </div>
-                )}
+                {error && <ErrorForm message={error} className="w-full" />}
 
                 <form className='w-full flex flex-col gap-4' onSubmit={handleSubmit}>
                     <div className='flex flex-col gap-2 w-full'>

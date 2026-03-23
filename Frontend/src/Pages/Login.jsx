@@ -3,7 +3,7 @@ import { PiLockKeyLight } from "react-icons/pi";
 import { PiUser } from "react-icons/pi";
 import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../Contexts/UserContext';
-import { MdErrorOutline } from "react-icons/md";
+import ErrorForm from '../components/common/ErrorForm';
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { Link, useNavigate } from 'react-router-dom';
@@ -73,7 +73,7 @@ function Login() {
             <div className='text-7xl text-blue-500'><RiMoneyDollarCircleLine /></div>
             <h2 className='text-2xl font-bold text-center'>FinanceTracker</h2>
             <p className='text-gray-600 text-center'>Manage your finances with ease</p>
-            {error && <p className='text-red-600 text-sm w-full flex items-center gap-1'><span className='text-lg'><MdErrorOutline /></span>{error}</p>}
+            {error && <ErrorForm message={error} className="w-full" />}
             <div className='relative w-full'>
                 <div className='absolute left-3 top-3 text-gray-600'><PiUser /></div>
                 <input type="text" name="username" placeholder='Username' className='border border-gray-300 rounded-xl px-4 py-2 w-full pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500' required onChange={handleChange} />

@@ -1,6 +1,6 @@
 import { useContext,useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
-import ErrorDisplay from '../common/ErrorDisplay';
+import ErrorForm from '../common/ErrorForm';
 
 function AddBudgetModal({ setIsAddModalOpen }) {
     const {addBudget} = useContext(FinanceContext);
@@ -60,7 +60,7 @@ function AddBudgetModal({ setIsAddModalOpen }) {
             <h2 className='text-2xl font-bold mb-4'>Add Budget</h2>
             {error && (
                 <div className="mb-4">
-                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                    <ErrorForm message={error} />
                 </div>
             )}
             <form onSubmit={handleSubmit}>

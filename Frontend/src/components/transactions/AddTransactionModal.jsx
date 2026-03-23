@@ -1,7 +1,7 @@
 import React from 'react'
 import { useContext, useState } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
-import ErrorDisplay from '../common/ErrorDisplay';
+import ErrorForm from '../common/ErrorForm';
 
 function AddTransactionModal({ setIsAddModalOpen }) {
     const IncomeCategories = [
@@ -83,7 +83,7 @@ function AddTransactionModal({ setIsAddModalOpen }) {
             <h1 className='text-xl font-semibold mb-4'>Add New Transaction</h1>
             {error && (
                 <div className="mb-4">
-                    <ErrorDisplay message={error} onDismiss={() => setError(null)} />
+                    <ErrorForm message={error} />
                 </div>
             )}
             <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
