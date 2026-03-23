@@ -43,7 +43,6 @@ function Dashboard() {
         <ErrorDisplay
           message={error}
           onRetry={refreshData}
-          onDismiss={() => setError(null)}
           retryLabel="Reload Dashboard"
         />
       </div>

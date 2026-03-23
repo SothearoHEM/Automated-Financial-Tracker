@@ -21,13 +21,20 @@ function Reports() {
     return <Loading message="Loading reports..." />;
   }
 
+  if (error) {
+    return (
+      <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
+        <ErrorDisplay
+          message={error}
+          onRetry={refreshData}
+          retryLabel="Reload Reports"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
-      {error && (
-        <div className="w-full mb-4">
-          <ErrorDisplay message={error} onRetry={refreshData} retryLabel="Reload Reports" />
-        </div>
-      )}
       <div className='w-full flex md:flex-row flex-col md:items-center items-start justify-between gap-4'>
         <div className='flex flex-col'>
           <h1 className='text-2xl font-bold'>Reports</h1>

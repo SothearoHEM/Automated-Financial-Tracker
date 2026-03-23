@@ -16,13 +16,20 @@ function Transactions() {
     return <Loading message="Loading transactions..." />;
   }
 
+  if (error) {
+    return (
+      <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
+        <ErrorDisplay
+          message={error}
+          onRetry={refreshData}
+          retryLabel="Reload Transactions"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className='max-w-7xl flex flex-col items-center justify-center mx-auto mt-5 md:mb-0 mb-20 px-4 sm:px-6 lg:px-8'>
-      {error && (
-        <div className="w-full mb-4">
-          <ErrorDisplay message={error} onRetry={refreshData} retryLabel="Reload Transactions" />
-        </div>
-      )}
       <div className='w-full h-16 flex items-center justify-between'>
         <div className='flex flex-col'>
           <h1 className='text-2xl font-bold'>Transactions</h1>
