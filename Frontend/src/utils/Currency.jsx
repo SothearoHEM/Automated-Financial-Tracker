@@ -38,9 +38,34 @@ export const calculateTotal = (transactions, type, toCurrency = 'KHR') => {
     return transactions
         .filter(transaction => transaction.type.toLowerCase() === type.toLowerCase())
         .reduce((total, transaction) => {
-            const amount = transaction.currency === toCurrency 
-            ? transaction.amount 
+            const amount = transaction.currency === toCurrency
+            ? transaction.amount
             : convertCurrency(transaction.amount, transaction.currency, toCurrency);
             return total + amount;
         }, 0);
+}
+
+/**
+ * Get current date in Cambodia timezone (UTC+7)
+ * Returns date in YYYY-MM-DD format
+ */
+export const getCambodiaToday = () => {
+    const now = new Date();
+
+    // Use Intl.DateTimeFormat to get date in Cambodia timezone (Asia/Phnom_Penh = UTC+7)
+    const options = {
+        timeZone: 'Asia/Phnom_Penh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    };
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const parts = formatter.formatToParts(now);
+
+    const year = parts.find(part => part.type === 'year').value;
+    const month = parts.find(part => part.type === 'month').value;
+    const day = parts.find(part => part.type === 'day').value;
+
+    return `${year}-${month}-${day}`;
 }

@@ -50,7 +50,7 @@ function BudgetsList() {
                 <p className='text-gray-500'>Add a new budget to get started.</p>
             </div>
         ) : (
-            <div className='w-full grid md:grid-cols-2 gap-4'>
+            <div className='w-full grid md:grid-cols-3 gap-4'>
                 {filteredBudgets.map((budget) => {
                     const { spent, remaining } = getBudgetStats(budget);
                     return (

@@ -290,7 +290,7 @@ export const FinanceProvider = ({ children }) => {
                 ...response.data.goal,
                 target_amount: parseFloat(response.data.goal.target_amount),
                 current_amount: parseFloat(response.data.goal.current_amount),
-                status: response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1)
+                status: response.data.goal.status ? response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1).replace(/_/g, " ") : "In Progress"
             };
             setGoals(prev => [newGoal, ...prev]);
             return response.data;
@@ -307,9 +307,9 @@ export const FinanceProvider = ({ children }) => {
                 ...response.data.goal,
                 target_amount: parseFloat(response.data.goal.target_amount),
                 current_amount: parseFloat(response.data.goal.current_amount),
-                status: response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1)
+                status: response.data.goal.status ? response.data.goal.status.charAt(0).toUpperCase() + response.data.goal.status.slice(1).replace(/_/g, " ") : "In Progress"
             };
-            setGoals(prev => prev.map(g => g.id === id ? updatedGoal : g));
+            setGoals(prev => prev.map(g => g.id.toString() === id.toString() ? updatedGoal : g));
             return response.data;
         } catch (error) {
             console.error('Failed to update goal:', error);

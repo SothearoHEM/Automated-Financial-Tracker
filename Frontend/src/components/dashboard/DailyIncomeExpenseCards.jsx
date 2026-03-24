@@ -1,15 +1,15 @@
 import React from 'react'
 import { useContext, useMemo } from 'react';
 import { FinanceContext } from '../../Contexts/FinanceContext';
-import { convertCurrency } from '../../utils/Currency';
-import { getCurrencySymbol } from '../../utils/Currency';
+import { convertCurrency, getCambodiaToday, getCurrencySymbol } from '../../utils/Currency';
 import { FaArrowTrendUp } from "react-icons/fa6";
 import { FaArrowTrendDown } from "react-icons/fa6";
 
 function DailyIncomeExpenseCards() {
     const { transactions } = useContext(FinanceContext);
 
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    // Get today's date in Cambodia timezone (UTC+7)
+    const today = getCambodiaToday();
 
     const todayIncomeKHR = useMemo(() => {
         return transactions

@@ -11,12 +11,19 @@ function GoalsList() {
         goals,
         getGoalProgress,
         deleteGoal,
+        error,
         setError,
         goalStatus,
         goalStatusFilter,
         setGoalStatusFilter,
-        filteredGoals
+        filteredGoals,
+        updateGoal
     } = useContext(FinanceContext);
+
+    const [selectedGoalId, setSelectedGoalId] = useState('');
+    const [updateAmount, setUpdateAmount] = useState('');
+    const [updateLoading, setUpdateLoading] = useState(false);
+    const [updateError, setUpdateError] = useState(null);
 
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this goal?')) {
@@ -28,11 +35,61 @@ function GoalsList() {
         }
     };
 
-    const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
-    const [currentGoal, setCurrentGoal] = React.useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [currentGoal, setCurrentGoal] = useState(null);
     const handleEditClick = (goal) => {
         setCurrentGoal(goal);
         setIsEditModalOpen(true);
+        setUpdateError(null); // Clear update error when opening edit modal
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setUpdateError(null);
+    };
+
+    const handleUpdateGoal = async () => {
+        if (!selectedGoalId) {
+            setUpdateError('Please select a goal to update');
+            return;
+        }
+        if (!updateAmount || parseFloat(updateAmount) < 0) {
+            setUpdateError('Please enter a valid amount');
+            return;
+        }
+
+        // Find the selected goal to get all required fields
+        const goalToUpdate = goals.find(g => g.id.toString() === selectedGoalId);
+        if (!goalToUpdate) {
+            setUpdateError('Selected goal not found');
+            return;
+        }
+
+        setUpdateLoading(true);
+        setUpdateError(null);
+        try {
+            // Send all required fields, updating only current_amount
+            // Only include required fields to avoid validation errors
+            const updateData = {
+                name: goalToUpdate.name,
+                target_amount: goalToUpdate.target_amount,
+                currency: goalToUpdate.currency,
+                target_date: goalToUpdate.target_date,
+                current_amount: parseFloat(updateAmount)
+            };
+            // Only add optional fields if they exist
+            if (goalToUpdate.description) {
+                updateData.description = goalToUpdate.description;
+            }
+            // Don't send status - backend auto-calculates it
+            await updateGoal(selectedGoalId, updateData);
+            setUpdateAmount('');
+            setSelectedGoalId('');
+        } catch (err) {
+            setUpdateError(err.response?.data?.message || 'Failed to update goal amount');
+        } finally {
+            setUpdateLoading(false);
+        }
     };
 
     const getStatusBadgeClass = (status, daysLeft) => {
@@ -48,23 +105,73 @@ function GoalsList() {
 
     return (
         <div className='w-full'>
-            {/* Filters */}
-            <div className='mb-4 flex items-center gap-4'>
-                <div className='flex items-center gap-2'>
-                    <label htmlFor="statusFilter" className='text-gray-700 font-medium'>Status:</label>
-                    <select
-                        id="statusFilter"
-                        value={goalStatusFilter}
-                        onChange={(e) => setGoalStatusFilter(e.target.value)}
-                        className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    >
-                        {goalStatus.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
+            {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+            <div className='mb-4 flex md:flex-row flex-col items-center gap-4'>
+                {/* Filters */}
+                <div className='md:mb-4 mb-0 flex items-center gap-4 w-full md:w-auto'>
+                    <div className='flex items-center gap-2 w-full'>
+                        <label htmlFor="statusFilter" className='text-gray-700 font-medium'>Status:</label>
+                        <select
+                            id="statusFilter"
+                            value={goalStatusFilter}
+                            onChange={(e) => setGoalStatusFilter(e.target.value)}
+                            className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 md:w-auto w-full'
+                        >
+                            {goalStatus.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className='mb-4 flex flex-col w-full gap-2'>
+                    <div className='flex md:flex-row flex-col items-center gap-2'>
+                        <input
+                            type="number"
+                            step="0.01"
+                            placeholder="Enter new current amount"
+                            value={updateAmount}
+                            onChange={(e) => {
+                                setUpdateAmount(e.target.value);
+                                setUpdateError(null);
+                            }}
+                            className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 md:w-2/8 w-full'
+                        />
+                        <select
+                            name="goal"
+                            value={selectedGoalId}
+                            onChange={(e) => {
+                                setSelectedGoalId(e.target.value);
+                                setUpdateError(null);
+                            }}
+                            className='border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 md:w-auto w-full'
+                        >
+                            <option value="">Select Goal by Name to Update</option>
+                            {goals.map((goal) => (
+                                <option key={goal.id} value={goal.id}>
+                                    {goal.name} ({getCurrencySymbol(goal.currency)}{goal.current_amount.toFixed(2)})
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            className='flex items-center gap-2 md:w-auto w-full text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed'
+                            onClick={handleUpdateGoal}
+                            disabled={updateLoading}
+                        >
+                            <CiCirclePlus className='text-xl' />
+                            {updateLoading ? 'Updating...' : 'Update Goal'}
+                        </button>
+                    </div>
                 </div>
             </div>
-
+            {updateError && (
+                <div className="p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm mb-4">
+                    {updateError}
+                </div>
+            )}
             {filteredGoals.length === 0 ? (
                 <div className='w-full bg-white border border-gray-300 rounded-lg flex flex-col p-4 items-center justify-center py-10'>
                     <div className='text-7xl text-gray-500'><CiCirclePlus /></div>
@@ -84,6 +191,7 @@ function GoalsList() {
                                 <div className='w-full flex items-start justify-between mb-4'>
                                     <div className='flex flex-col items-start gap-1 flex-1'>
                                         <p className='text-lg font-semibold'>{goal.name}</p>
+                                        <p className='text-sm text-gray-500'>{goal.description}</p>
                                     </div>
                                     <div className='flex items-center gap-2'>
                                         <div className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadgeClass(goal.status, goal.days_left)}`}>
@@ -169,7 +277,7 @@ function GoalsList() {
                 </div>
             )}
             <div>
-                {isEditModalOpen && <EditGoalModal goal={currentGoal} setIsEditModalOpen={setIsEditModalOpen} />}
+                {isEditModalOpen && <EditGoalModal goal={currentGoal} setIsEditModalOpen={handleCloseEditModal} />}
             </div>
         </div>
     );
