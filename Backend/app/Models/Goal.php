@@ -15,6 +15,7 @@ class Goal extends Model
         'currency',
         'target_date',
         'status',
+        'is_deleted',
     ];
 
     protected $casts = [

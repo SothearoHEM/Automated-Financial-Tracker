@@ -357,16 +357,36 @@ export const FinanceProvider = ({ children }) => {
         const now = new Date();
         const range = parseInt(timeRange);
 
+        // Get today's date components in local time for comparison
+        const todayYear = now.getFullYear();
+        const todayMonth = now.getMonth();
+        const todayDate = now.getDate();
+
         return transactions.filter(transaction => {
             const transactionDate = new Date(transaction.date);
-            const diffTime = Math.abs(now - transactionDate);
+            const tYear = transactionDate.getFullYear();
+            const tMonth = transactionDate.getMonth();
+            const tDate = transactionDate.getDate();
+
+            // Check if transaction is in the future (strictly after today)
+            // Compare year, month, day to avoid timezone issues
+            if (tYear > todayYear || (tYear === todayYear && tMonth > todayMonth) || (tYear === todayYear && tMonth === todayMonth && tDate > todayDate)) {
+                return false;
+            }
+
+            // Calculate difference in days
+            const diffTime = now - transactionDate;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             if (reportType === 'weekly') {
                 return diffDays <= range * 7;
             } else {
-                const monthDiff = (now.getFullYear() - transactionDate.getFullYear()) * 12 + (now.getMonth() - transactionDate.getMonth());
-                return monthDiff < range && monthDiff >= 0;
+                // For monthly, calculate the number of whole months between dates
+                const monthDiff = (todayYear - tYear) * 12 + (todayMonth - tMonth);
+                // Also check if the day of month of transaction is after today's day
+                // If it is, it belongs to a later month in the same year difference
+                const adjustedMonthDiff = tDate > todayDate ? monthDiff - 1 : monthDiff;
+                return adjustedMonthDiff < range && adjustedMonthDiff >= 0;
             }
         });
     }, [transactions, timeRange, reportType]);

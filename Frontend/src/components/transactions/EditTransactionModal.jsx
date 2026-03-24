@@ -43,7 +43,7 @@ function EditTransactionModal({ setIsEditModalOpen, transactionToEdit }) {
         }
         setLoading(true);
         try {
-            await updateTransaction({
+            await updateTransaction(tranFormData.id, {
                 ...tranFormData,
                 amount: Number(tranFormData.amount)
             });

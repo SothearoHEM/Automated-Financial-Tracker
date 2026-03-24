@@ -15,7 +15,7 @@ function MobileNavbar() {
           { name: 'Reports', link: '/reports', logo: <VscGraph /> },
       ];
   return (
-    <div className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden safe-area-bottom z-50'>
+    <div className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden safe-area-bottom z-1'>
       <nav className='w-full'>
         <ul className='flex items-center justify-around py-2 px-1'>
           {Nav.map((item, index) => (

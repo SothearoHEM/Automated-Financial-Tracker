@@ -12,10 +12,12 @@ class Budget extends Model
         'limit_amount',
         'currency',
         'period',
+        'is_deleted',
     ];
 
     protected $casts = [
         'limit_amount' => 'decimal:2',
+        'is_deleted' => 'boolean',
     ];
 
     public function user()

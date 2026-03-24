@@ -41,7 +41,7 @@ class BudgetController extends Controller
      * POST /api/budgets
      *
      * Note: This uses "upsert" logic. If a budget exists with same user+category+period+currency,
-     * it will be updated instead of creating duplicate.
+     * it will be updated instead of creating duplicate. Also restores soft-deleted budgets.
      */
     public function store(StoreBudgetRequest $request)
     {
@@ -49,18 +49,18 @@ class BudgetController extends Controller
 
         $validated = $request->validated();
 
-        // Check if budget already exists for this user + category + period + currency
+        // Check if ANY budget exists for this user + category + period + currency (including soft-deleted)
         $existingBudget = Budget::where('user_id', $user->id)
             ->where('category', $validated['category'])
             ->where('period', $validated['period'])
             ->where('currency', $validated['currency'])
-            ->where('is_deleted', false)
             ->first();
 
         if ($existingBudget) {
-            // Update existing budget
+            // Update existing budget and restore if it was soft-deleted
             $existingBudget->update([
                 'limit_amount' => $validated['limit_amount'],
+                'is_deleted' => false, // Restore if previously deleted
             ]);
 
             return response()->json([

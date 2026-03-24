@@ -9,6 +9,7 @@ import { convertCurrency } from '../utils/Currency';
 import { MdCurrencyExchange } from "react-icons/md";
 import Loading from '../components/common/Loading';
 import ErrorDisplay from '../components/common/ErrorDisplay';
+import DailyIncomeExpenseCards from '../components/dashboard/DailyIncomeExpenseCards';
 
 function Dashboard() {
   const {budgets, transactions, exchangeRate , updateExchangeRate, isLoading, error, setError, refreshData} = useContext(FinanceContext);
@@ -68,6 +69,9 @@ function Dashboard() {
         </div>
         <div className='w-full mt-5'>
             <DashboardInfoCards />
+        </div>
+        <div className='w-full mt-5'>
+            <DailyIncomeExpenseCards />
         </div>
         <div className={ `w-full mt-5 ${budgetAlerts.length > 0 ? '' : 'hidden'}`}>
             <BudgetAlerts budgetAlerts={budgetAlerts} />

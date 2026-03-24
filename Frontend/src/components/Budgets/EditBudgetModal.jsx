@@ -34,7 +34,7 @@ function EditBudgetModal({ budget, setIsEditModalOpen }) {
         }
         setLoading(true);
         try {
-            await updateBudget({
+            await updateBudget(formData.id, {
                 ...formData,
                 amount: Number(formData.amount)
             });
