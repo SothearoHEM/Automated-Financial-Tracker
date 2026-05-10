@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearAuthSession, getCookieValue } from '../utils/clientStorage';
 
 // Create axios instance with base configuration
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -13,7 +14,7 @@ const api = axios.create({
 // Add token to requests automatically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getCookieValue('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,9 +30,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('isLoggedIn');
+      clearAuthSession();
       window.location.href = '/login';
     }
     return Promise.reject(error);

@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
 import { authAPI } from '../api/auth';
+import { clearAuthSession, getCookieValue, getSessionItem, setSessionCookie, setSessionItem, removeSessionItem } from '../utils/clientStorage';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const UserContext = createContext();
@@ -7,7 +8,7 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(() => {
         try {
-            const savedCurrentUser = localStorage.getItem('currentUser');
+            const savedCurrentUser = getSessionItem('currentUser');
             return savedCurrentUser ? JSON.parse(savedCurrentUser) : null;
         } catch (error) {
             console.error(error);
@@ -15,7 +16,7 @@ export const UserProvider = ({ children }) => {
         }
     });
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
-        const savedIsLoggedIn = localStorage.getItem('isLoggedIn');
+        const savedIsLoggedIn = getSessionItem('isLoggedIn');
         return savedIsLoggedIn === 'true';
     });
     const [loading, setLoading] = useState(true);
@@ -24,17 +25,15 @@ export const UserProvider = ({ children }) => {
     // On mount: if token exists, validate it by fetching current user
     useEffect(() => {
         const validateToken = async () => {
-            const token = localStorage.getItem('auth_token');
-            if (token && currentUser) {
+            const token = getCookieValue('auth_token');
+            if (token) {
                 try {
                     const response = await authAPI.getCurrentUser();
                     setCurrentUser(response.data);
                     setIsLoggedIn(true);
                 } catch (error) {
                     console.error('Token validation failed:', error);
-                    localStorage.removeItem('auth_token');
-                    localStorage.removeItem('currentUser');
-                    localStorage.removeItem('isLoggedIn');
+                    clearAuthSession();
                     setCurrentUser(null);
                     setIsLoggedIn(false);
                 }
@@ -47,11 +46,12 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         if (currentUser) {
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            setSessionItem('currentUser', JSON.stringify(currentUser));
+            setSessionItem('isLoggedIn', 'true');
             setIsLoggedIn(true);
         } else {
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('isLoggedIn');
+            removeSessionItem('currentUser');
+            removeSessionItem('isLoggedIn');
             setIsLoggedIn(false);
         }
     }, [currentUser]);
@@ -59,12 +59,15 @@ export const UserProvider = ({ children }) => {
     const login = async (username, password) => {
         try {
             const response = await authAPI.login(username, password);
-            localStorage.setItem('auth_token', response.data.token);
+            setSessionCookie('auth_token', response.data.token);
             // Fetch current user details
             const userResponse = await authAPI.getCurrentUser();
             setCurrentUser(userResponse.data);
             return { success: true, message: response.data.message };
         } catch (error) {
+            clearAuthSession();
+            setCurrentUser(null);
+            setIsLoggedIn(false);
             const message = error.response?.data?.message || 'Login failed';
             return { success: false, message };
         }
@@ -77,9 +80,7 @@ export const UserProvider = ({ children }) => {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('isLoggedIn');
+            clearAuthSession();
             setCurrentUser(null);
             setIsLoggedIn(false);
             setLogoutLoading(false);
@@ -89,7 +90,7 @@ export const UserProvider = ({ children }) => {
     const register = async (name, username, password, password_confirmation) => {
         try {
             const response = await authAPI.register(name, username, password, password_confirmation);
-            localStorage.setItem('auth_token', response.data.token);
+            setSessionCookie('auth_token', response.data.token);
             setCurrentUser(response.data.user);
             setIsLoggedIn(true);
             return { success: true, message: response.data.message };

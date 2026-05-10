@@ -6,6 +6,7 @@ import { goalsAPI } from '../api/goals';
 import { authAPI } from '../api/auth';
 import { useContext } from 'react';
 import { UserContext } from './UserContext';
+import { getSessionItem, setSessionItem } from '../utils/clientStorage';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const FinanceContext = createContext();
@@ -30,7 +31,7 @@ export const FinanceProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [exchangeRate, setExchangeRate] = useState(() => {
-        const savedRate = localStorage.getItem('exchangeRate');
+        const savedRate = getSessionItem('exchangeRate');
         const parsed = savedRate ? parseFloat(savedRate) : 4000;
         return isNaN(parsed) ? 4000 : parsed;
     });
@@ -39,7 +40,7 @@ export const FinanceProvider = ({ children }) => {
     useEffect(() => {
         if (currentUser?.exchange_rate) {
             setExchangeRate(currentUser.exchange_rate);
-            localStorage.setItem('exchangeRate', currentUser.exchange_rate.toString());
+            setSessionItem('exchangeRate', currentUser.exchange_rate.toString());
         }
     }, [currentUser]);
 
@@ -49,7 +50,7 @@ export const FinanceProvider = ({ children }) => {
             await authAPI.updateExchangeRate(newRate);
             // Then update local state
             setExchangeRate(newRate);
-            localStorage.setItem('exchangeRate', newRate.toString());
+            setSessionItem('exchangeRate', newRate.toString());
             // Update currentUser to reflect the new exchange rate
             if (currentUser) {
                 setCurrentUser({ ...currentUser, exchange_rate: newRate });

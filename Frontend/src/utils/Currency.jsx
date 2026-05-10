@@ -1,7 +1,9 @@
+import { getSessionItem } from './clientStorage';
+
 const defaultExchangeRate = 4000; // 1 USD = 4000 KHR
 
 const getExchangeRate = () => {
-    const savedRate = localStorage.getItem('exchangeRate');
+    const savedRate = getSessionItem('exchangeRate');
     if (!savedRate) return defaultExchangeRate;
     const parsed = parseFloat(savedRate);
     return isNaN(parsed) || parsed <= 0 ? defaultExchangeRate : parsed;
